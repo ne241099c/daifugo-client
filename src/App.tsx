@@ -1,35 +1,51 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useGame } from './hooks/useGame'
+import { LoginScreen } from './pages/Login'
+import { GameScreen } from './pages/GameRoom/GameRoom'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const {
+    isConnected,
+    gameState,
+    isEntry,
+    connect,
+    startGame,
+    playCards,
+    passTurn,
+    logout
+  } = useGame();
+  const [currentUser, setCurrentUser] = useState({ name: '', room: '' });
+
+  const handleJoin = (name: string, room: string) => {
+    setCurrentUser({ name, room });
+    connect(name, room);
+  };
+
+  if (isEntry) {
+    return (
+      <div className="container" style={{ marginTop: '50px' }}>
+        <h2>🔄 復帰中...</h2>
+        <p>サーバーと通信しています</p>
+      </div>
+    );
+  }
+
+  if (!isConnected) {
+    return <LoginScreen onJoin={handleJoin} />;
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <GameScreen
+      gameState={gameState}
+      username={currentUser.name}
+      roomID={currentUser.room}
+      onStart={startGame}
+      onPlay={playCards}
+      onPass={passTurn}
+      logout={logout}
+    />
+  );
 }
 
 export default App
