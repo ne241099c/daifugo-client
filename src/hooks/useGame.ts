@@ -1,167 +1,228 @@
 import { useState, useEffect, useRef } from "react";
-import type { GameState, Card } from "../types";
+import type { Room, User, Card } from "../types";
+import { SSE_URL } from "../lib/config";
+import { request } from "../lib/graphql";
+
+// GraphQL queries/mutations
+const SIGN_UP_MUTATION = `
+  mutation SignUp($name: String!, $email: String!, $password: String!) {
+    signUp(in: {name: $name, email: $email, password: $password}) {
+      id
+      name
+      email
+    }
+  }
+`;
+
+const JOIN_ROOM_MUTATION = `
+  mutation JoinRoom($roomId: ID!) {
+    joinRoom(roomId: $roomId) {
+      id
+      name
+      memberIds
+    }
+  }
+`;
+
+const START_GAME_MUTATION = `
+  mutation StartGame($roomId: ID!) {
+    startGame(roomId: $roomId) {
+      id
+      game {
+        turn
+        fieldCards { id suit rank }
+        isRevolution
+        passCount
+      }
+    }
+  }
+`;
+
+const PLAY_CARD_MUTATION = `
+  mutation PlayCard($roomId: ID!, $cardIds: [Int!]!) {
+    playCard(roomId: $roomId, cardIds: $cardIds) {
+      id
+    }
+  }
+`;
+
+const PASS_MUTATION = `
+  mutation Pass($roomId: ID!) {
+    pass(roomId: $roomId) {
+      id
+    }
+  }
+`;
+
+const GET_ROOM_QUERY = `
+  query GetRoom($id: ID!) {
+    room(id: $id) {
+      id
+      name
+      ownerId
+      memberIds
+      owner { id name }
+      members { id name }
+      game {
+        turn
+        fieldCards { id suit rank }
+        isRevolution
+        players {
+          userId
+          hand { id suit rank }
+          rank
+        }
+        finishedPlayers { userId rank }
+        passCount
+      }
+    }
+  }
+`;
 
 export const useGame = () => {
-    // 接続状態
-    const [isConnected, setIsConnected] = useState<boolean>(false)
+    // State
+    const [token, setToken] = useState<string | null>(sessionStorage.getItem("daifugo_token"));
+    const [user, setUser] = useState<User | null>(null);
+    const [room, setRoom] = useState<Room | null>(null);
+    const [isConnected, setIsConnected] = useState<boolean>(false);
 
-    // ゲーム状態
-    const [gameState, setGameState] = useState<GameState | null>(null)
+    const eventSourceRef = useRef<EventSource | null>(null);
 
-    // 入室チェック中かどうか
-    const [isEntry, setIsEntry] = useState<boolean>(true);
-
-    // WebSocket接続
-    const socketRef = useRef<WebSocket | null>(null)
-
-    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
+    // Initial connection to SSE
     useEffect(() => {
-        const savedName = sessionStorage.getItem("poker_name");
-        const savedRoom = sessionStorage.getItem("poker_room");
+        if (!eventSourceRef.current) {
+            console.log("Connecting to SSE...", SSE_URL);
+            const es = new EventSource(SSE_URL);
+            
+            es.onopen = () => {
+                console.log("✅ SSE Connected");
+                setIsConnected(true);
+            };
 
-        if (savedName && savedRoom && !socketRef.current) {
-            console.log("🔄 前回のセッションから復帰します...");
-            timerRef.current = setTimeout(() => {
-                connect(savedName, savedRoom);
-                setIsEntry(false); // チェック完了
-            }, 500);
-        } else {
-            setIsEntry(false); // チェック完了
+            es.onerror = (err) => {
+                console.error("❌ SSE Error", err);
+                setIsConnected(false);
+            };
+
+            // Custom event listeners
+            es.addEventListener("room_created", (e: MessageEvent) => {
+                console.log("Room Created Event:", e.data);
+            });
+
+            es.addEventListener("room_updated", () => {
+                // Should re-fetch room if we are in it
+                if (room) {
+                     fetchRoom(room.id);
+                }
+            });
+
+            es.addEventListener("game_started", () => {
+                if (room) fetchRoom(room.id);
+            });
+
+            es.addEventListener("game_update", () => {
+                if (room) fetchRoom(room.id);
+            });
+
+            eventSourceRef.current = es;
         }
+
         return () => {
-            if (timerRef.current) {
-                clearTimeout(timerRef.current);
+            if (eventSourceRef.current) {
+                eventSourceRef.current.close();
+                eventSourceRef.current = null;
             }
         };
-    }, []);
+    }, [room]);
 
-    const connect = (name: string, roomID: string) => {
-        if (!name) {
-            alert("名前を入力してください")
-            return
-        }
-
-        if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-            console.log("すでに接続済みです");
-            return;
-        }
-
-        sessionStorage.setItem("poker_name", name);
-        sessionStorage.setItem("poker_room", roomID);
-
-        const baseUrl = import.meta.env.VITE_WS_URL
-        if (!baseUrl) {
-            console.error("設定エラー: VITE_WS_URL が見つかりません")
-            return
-        }
-
-        const wsUrl = `${baseUrl}?room=${roomID}&name=${encodeURIComponent(name)}`
-        console.log("接続開始:", wsUrl)
-
-        const ws = new WebSocket(wsUrl)
-        socketRef.current = ws;
-
-        // 接続成功時の処理
-        ws.onopen = () => {
-            console.log("✅ サーバーに繋がりました")
-            setIsConnected(true) // 画面をゲームモードに切り替え
-        };
-
-        ws.onmessage = (event) => {
-            // JSON文字データを、JSのオブジェクトに変換
-            const msg = JSON.parse(event.data)
-
-            // ゲームの状態データなら保存する
-            if (msg.type === "game_status") {
-                setGameState(msg.payload as GameState)
+    const fetchRoom = async (roomId: string) => {
+        try {
+            const data = await request<{ room: Room }>(GET_ROOM_QUERY, { id: roomId }, token || undefined);
+            if (data.room) {
+                setRoom(data.room);
             }
-        };
-
-        // 切断されたときの処理
-        ws.onclose = () => {
-            if (socketRef.current !== ws) {
-                console.log("古い接続の切断を無視しました");
-                return;
-            }
-
-            console.log("❌ 切断されました")
-            setIsConnected(false) // ログイン画面に戻す
-            setGameState(null)
-            socketRef.current = null;
-        };
-
-        socketRef.current = ws
+        } catch (e) {
+            console.error("Failed to fetch room", e);
+        }
     };
 
-    const startGame = () => {
-        if (!socketRef.current) return;
-
-        const msg = {
-            type: "start_game", // Go側の MsgStartGame に対応
-            payload: {}
-        };
-
-        socketRef.current.send(JSON.stringify(msg));
-        console.log("📤 ゲーム開始リクエストを送信しました");
+    const signUp = async (name: string, email: string, pass: string) => {
+        try {
+            const data = await request<{ signUp: User }>(SIGN_UP_MUTATION, { name, email, password: pass });
+            // Assume we can get a token somehow, or user ID is enough for now?
+            // Since backend is strict, we really need a token.
+            // For now, we store the user.
+            setUser(data.signUp);
+            console.log("Signed Up:", data.signUp);
+            return data.signUp;
+        } catch (e) {
+            console.error("SignUp Failed", e);
+            throw e;
+        }
     };
 
-    const playCards = (cards: Card[]) => {
-        if (!socketRef.current) return;
-
-        const payload = {
-            cards: cards
-        };
-
-        const msg = {
-            type: "play_card",
-            payload: payload
-        };
-
-        socketRef.current.send(JSON.stringify(msg));
-        console.log("📤 カードを送信:", cards);
+    // Helper to manually set token (for dev/testing or if we implement a hack)
+    const setAuthToken = (t: string) => {
+        sessionStorage.setItem("daifugo_token", t);
+        setToken(t);
     };
 
-    const passTurn = () => {
-        if (!socketRef.current) return;
+    const joinRoom = async (roomId: string) => {
+        if (!token) throw new Error("No token");
+        try {
+            const data = await request<{ joinRoom: Room }>(JOIN_ROOM_MUTATION, { roomId }, token);
+            setRoom(data.joinRoom);
+            // Fetch full details
+            await fetchRoom(data.joinRoom.id);
+        } catch (e) {
+            console.error("Join Room Failed", e);
+            throw e;
+        }
+    };
 
-        const msg = {
-            type: "pass", // Go側の MsgPassTurn に対応
-            payload: {}
-        };
+    const startGame = async () => {
+        if (!token || !room) return;
+        try {
+            await request(START_GAME_MUTATION, { roomId: room.id }, token);
+        } catch (e) {
+            console.error("Start Game Failed", e);
+        }
+    };
 
-        socketRef.current.send(JSON.stringify(msg));
-        console.log("📤 パスしました");
+    const playCards = async (cards: Card[]) => {
+        if (!token || !room) return;
+        const cardIds = cards.map(c => c.id);
+        try {
+            await request(PLAY_CARD_MUTATION, { roomId: room.id, cardIds }, token);
+        } catch (e) {
+            console.error("Play Cards Failed", e);
+        }
+    };
+
+    const passTurn = async () => {
+        if (!token || !room) return;
+        try {
+            await request(PASS_MUTATION, { roomId: room.id }, token);
+        } catch (e) {
+            console.error("Pass Failed", e);
+        }
     };
 
     const logout = () => {
-        // セッション情報を削除
-        sessionStorage.removeItem("poker_name");
-        sessionStorage.removeItem("poker_room");
-        
-        // ソケットを切断
-        if (socketRef.current) {
-            socketRef.current.close();
-        }
-        // 画面をリセット
-        setIsConnected(false);
-        setGameState(null);
+        sessionStorage.removeItem("daifugo_token");
+        setToken(null);
+        setUser(null);
+        setRoom(null);
     };
-
-    // 片付け
-    useEffect(() => {
-        return () => {
-            if (socketRef.current) {
-                socketRef.current.close()
-            }
-        }
-    }, [])
 
     return {
         isConnected,
-        gameState,
-        isEntry,
-        connect,
+        token,
+        user,
+        room,
+        signUp,
+        setAuthToken,
+        joinRoom,
         startGame,
         playCards,
         passTurn,

@@ -16,7 +16,7 @@ export const OpponentArea = ({ allPlayers, currentTurnID, username, isActive }: 
                 const isTurn = isActive && (p.id === currentTurnID);
                 const isMe = p.name === username;
 
-                const rank = p.rank ?? p.Rank ?? 0;
+                const rank = p.rank ?? 0;
 
                 const cardClass = `
                     ${styles.opponentCard} 

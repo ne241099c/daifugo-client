@@ -9,8 +9,8 @@ interface GameResultProps {
 
 export const GameResult = ({ allPlayers, onReset, logout }: GameResultProps) => {
     const ranking = [...(allPlayers || [])].sort((a, b) => {
-        const rankA = a.rank ?? a.Rank ?? 0;
-        const rankB = b.rank ?? b.Rank ?? 0;
+        const rankA = a.rank ?? 0;
+        const rankB = b.rank ?? 0;
         
         if (rankA === 0) return 1;
         if (rankB === 0) return -1;
@@ -23,7 +23,7 @@ export const GameResult = ({ allPlayers, onReset, logout }: GameResultProps) => 
                 <h1 style={{ color: '#E91E63', fontSize: '3rem' }}>🏆 GAME SET!</h1>
                 <div style={{ margin: '20px 0', textAlign: 'left' }}>
                     {ranking.map((p, i) => {
-                        const rank = p.rank ?? p.Rank ?? 0;
+                        const rank = p.rank ?? 0;
                         const rankDisplay = rank === 0 ? '-' : `${rank}位`;
                         return (
                             <div key={i} className={styles.playerResult}>

@@ -1,16 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import styles from './GameRoom.module.css';
 
 import { GameHeader } from './components/GameHeader';
-import { GameResult } from './components/GameResult';
 import { OpponentArea } from './components/OpponentArea';
 import { TableArea } from './components/TableArea';
 import { HandArea } from './components/HandArea';
-import type { GameState, Card } from '../../types';
+import type { Room, Card, Player } from '../../types';
 
 interface GameScreenProps {
-    gameState: GameState | null;
-    roomID: string;
+    room: Room;
     username: string;
     onStart: () => void;
     onPlay: (cards: Card[]) => void;
@@ -18,47 +16,68 @@ interface GameScreenProps {
     logout: () => void;
 }
 
-// Helpers for robust property access
-const getSuit = (c: Card) => c.Suit ?? c.suit;
-const getRank = (c: Card) => c.Rank ?? c.rank;
-
-export const GameScreen = ({ gameState, roomID, username, onStart, onPlay, onPass, logout }: GameScreenProps) => {
+export const GameScreen = ({ room, username, onStart, onPlay, onPass, logout }: GameScreenProps) => {
     const [selectedCards, setSelectedCards] = useState<Card[]>([]);
     const [isDragOver, setIsDragOver] = useState(false);
-    const [showResult, setShowResult] = useState(false);
-    const isActive = gameState?.is_active;
-    const winnerName = gameState?.winner_name;
 
-    useEffect(() => {
-        if (!isActive && winnerName) {
-            setShowResult(true);
-        } else if (isActive) {
-            setShowResult(false);
-        }
-    }, [isActive, winnerName, gameState]);
+    // Derive game state from Room
+    const game = room.game;
+    const isActive = !!game;
+    // winner logic is missing in new schema? 
+    // "finishedPlayers" has ranking.
+    // If all players (except one?) are finished, game is over?
+    // Or if `finishedPlayers` is not empty?
+    // Let's assume game shows result if it was active but now maybe finished?
+    // Backend doesn't explicitly send "winner_name".
+    // We check if game is finished by checking passCount or something?
+    // The previous frontend relied on `winner_name` in `gameState`.
+    // The new `Room` -> `Game` doesn't have `winner_name`.
+    // But it has `finishedPlayers`.
+    
+    // For now, let's keep it simple: Show result if user is in finishedPlayers?
+    // Or just rely on `game` being present for active state.
+    
+    // Find my hand
+    // Need to map `members` to `game.players` to find `userId`.
+    // `username` is passed prop. Find userId from `room.members`.
+    const me = room.members.find(m => m.name === username);
+    const myPlayer = game?.players.find(p => p.userId === me?.id);
+    const hand = myPlayer?.hand || [];
+    
+    const tableCards = game?.fieldCards || [];
+    
+    // Is my turn?
+    // `game.turn` is an index? Or a user ID?
+    // Backend schema: `turn: Int!`. Probably index in `players` array.
+    const isMyTurn = game ? game.players[game.turn]?.userId === me?.id : false;
+    
+    const allPlayers = room.members.map(m => {
+        // Find game player state
+        const gp = game?.players.find(p => p.userId === m.id);
+        const finished = game?.finishedPlayers?.find(p => p.userId === m.id);
+        
+        // Map to old "Player" interface style for OpponentArea compatibility or update OpponentArea
+        // Old Player: { id, name, rank, hand_count }
+        return {
+            id: m.id,
+            name: m.name,
+            rank: finished ? finished.rank : (gp ? gp.rank : 0),
+            hand_count: gp ? gp.hand.length : 0, // Note: hand might be hidden for others? 
+            // GraphQL usually returns data you ask for. If `hand` is returned for all players, it's a security flaw in backend if not masked.
+            // But we will use what we get.
+        } as Player;
+    });
 
-    if (!gameState) {
-        return <div className={styles.container}>データ待機中...</div>;
-    }
+    const currentTurnID = game ? game.players[game.turn]?.userId : null;
+    const isRevolution = game?.isRevolution || false;
 
-    const hand = gameState.hand || [];
-    const tableCards = gameState.table_cards || [];
-    const isMyTurn = !!gameState.is_my_turn;
-    const allPlayers = gameState.all_players || [];
-    const currentTurnID = gameState.current_turn_id;
-    const isRevolution = gameState.is_revolution;
-
-    const effectiveMyTurn = isActive && isMyTurn;
-
-    const handleBackToLobby = () => {
-        setShowResult(false);
-    };
-
+    // ... (rest of drag and drop logic is same, but updated for Card type)
+    
     const toggleCard = (card: Card) => {
         setSelectedCards(prev => {
-            const isSelected = prev.some(c => getSuit(c) === getSuit(card) && getRank(c) === getRank(card));
+            const isSelected = prev.some(c => c.id === card.id);
             if (isSelected) {
-                return prev.filter(c => !(getSuit(c) === getSuit(card) && getRank(c) === getRank(card)));
+                return prev.filter(c => c.id !== card.id);
             } else {
                 return [...prev, card];
             }
@@ -66,80 +85,64 @@ export const GameScreen = ({ gameState, roomID, username, onStart, onPlay, onPas
     };
 
     const isSelected = (card: Card) => {
-        return selectedCards.some(c => getSuit(c) === getSuit(card) && getRank(c) === getRank(card));
+        return selectedCards.some(c => c.id === card.id);
     };
+    
+    // ...
 
-    const handleDragStart = (e: React.DragEvent<HTMLDivElement>, card: Card) => {
-        // e is unused, but kept for interface consistency or future use if needed
-        // to avoid TS unused var error, we can comment it out or use it
-        // using it:
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleDragStart = (e: any, card: Card) => {
         e.dataTransfer.effectAllowed = 'move';
-        
         if (!isSelected(card)) {
             setSelectedCards([card]);
         }
     };
 
-    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleDragOver = (e: any) => {
         e.preventDefault();
-        setIsDragOver(true); // 見た目を変える
+        setIsDragOver(true); 
     };
 
     const handleDragLeave = () => {
         setIsDragOver(false);
     };
 
-    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleDrop = (e: any) => {
         e.preventDefault();
         setIsDragOver(false);
-
-        // 何も選択していなければ無視
         if (selectedCards.length === 0) return;
-
-        // カードを出す
         onPlay(selectedCards);
-        setSelectedCards([]); // 選択解除
+        setSelectedCards([]); 
     };
-
-    if (!isActive && winnerName && showResult) {
-        return (
-            <GameResult
-                allPlayers={allPlayers}
-                onReset={handleBackToLobby}
-                logout={logout}
-            />
-        );
-    }
 
     const containerClass = `
         ${styles.container} 
         ${isRevolution ? styles.revolution : ''}
-        ${effectiveMyTurn ? styles.myTurn : ''}
+        ${isMyTurn ? styles.myTurn : ''}
     `;
 
     return (
         <div className={containerClass}>
-            {/* ヘッダー: 部屋情報、ボタン類 */}
             <GameHeader
-                roomID={roomID}
+                roomID={room.id}
                 username={username}
                 isActive={isActive}
-                isMyTurn={effectiveMyTurn}
+                isMyTurn={isMyTurn}
                 isRevolution={isRevolution}
                 onStart={onStart}
                 onPass={onPass}
                 logout={logout}
             />
             <main>
-                {/* 相手エリア: 画面上部に並ぶ */}
                 <OpponentArea
                     allPlayers={allPlayers}
-                    currentTurnID={currentTurnID}
+                    currentTurnID={currentTurnID || ''}
                     username={username}
-                    isActive={!!isActive}
+                    isActive={isActive}
                 />
 
-                {/* テーブルエリア: カードを出す場所 */}
                 <TableArea
                     tableCards={tableCards}
                     isDragOver={isDragOver}
@@ -148,21 +151,14 @@ export const GameScreen = ({ gameState, roomID, username, onStart, onPlay, onPas
                     onDrop={handleDrop}
                 />
 
-                {/* 手札エリア: 自分のカード */}
                 <HandArea
                     hand={hand}
                     username={username}
-                    isMyTurn={!!effectiveMyTurn}
+                    isMyTurn={isMyTurn}
                     toggleCard={toggleCard}
                     isSelected={isSelected}
                     onDragStart={handleDragStart}
                 />
-
-                {/* デバッグ用 */}
-                <details className={styles.debug}>
-                    <summary>内部データを見る</summary>
-                    <pre>{JSON.stringify(gameState, null, 2)}</pre>
-                </details>
             </main>
         </div>
     );

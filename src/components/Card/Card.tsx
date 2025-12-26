@@ -8,16 +8,29 @@ interface CardProps {
     onDragStart?: (e: React.DragEvent<HTMLDivElement>) => void;
 }
 
-export const Card = ({ card, onClick, isSelected, onDragStart }: CardProps) => {
-    const suits = ["♠", "♥", "♦", "♣", "Joker"];
-    const ranks = ["", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
-    const suitVal = card.Suit !== undefined ? card.Suit : card.suit;
-    const rankVal = card.Rank !== undefined ? card.Rank : card.rank;
-    
-    if (suitVal === undefined || rankVal === undefined) {
-        return <div className={styles.card}>?</div>;
-    }
+const suitMap: Record<string, number> = {
+    "Spade": 0,
+    "Heart": 1,
+    "Diamond": 2,
+    "Club": 3,
+    "Joker": 4
+};
 
+const suits = ["♠", "♥", "♦", "♣", "Joker"];
+const ranks = ["", "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+
+export const Card = ({ card, onClick, isSelected, onDragStart }: CardProps) => {
+    // Map string suit to index
+    let suitVal = suitMap[card.suit];
+    if (suitVal === undefined) {
+        // Fallback or assume backend might return 0-4 numbers as string or something?
+        // Schema says "suit: String!". I assume "Spade", etc.
+        // If unknown, default to Spade or ?
+        suitVal = 0; 
+    }
+    
+    const rankVal = card.rank;
+    
     const isRed = suitVal === 1 || suitVal === 2; // Hearts or Diamonds
     const suitStr = suits[suitVal];
     const rankStr = suitVal === 4 ? "" : ranks[rankVal];

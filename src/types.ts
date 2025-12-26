@@ -1,28 +1,56 @@
+// Matching backend Graphql schema
+
+export interface User {
+    id: string;
+    name: string;
+    email: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
 export interface Card {
-    Suit?: number;
-    suit?: number;
-    Rank?: number;
-    rank?: number;
+    id: number;
+    suit: string; // "Spade", "Heart", etc.
+    rank: number;
+}
+
+export interface GamePlayer {
+    userId: string;
+    user: User;
+    hand: Card[];
+    rank: number;
+}
+
+export interface Game {
+    turn: number;
+    fieldCards: Card[];
+    isRevolution: boolean;
+    players: GamePlayer[];
+    finishedPlayers: GamePlayer[];
+    passCount: number;
+}
+
+export interface Room {
+    id: string;
+    name: string;
+    ownerId: string;
+    memberIds: string[];
+    owner: User;
+    members: User[];
+    game: Game | null;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface Player {
-    id: string | number;
+    id: string;
     name: string;
-    rank?: number;
-    Rank?: number;
+    rank: number;
     hand_count: number;
 }
 
-export interface GameState {
-    is_active: boolean;
-    winner_name?: string;
-    hand: Card[];
-    table_cards: Card[];
-    is_my_turn: boolean;
-    all_players: Player[];
-    current_turn_id: string | number;
-    is_revolution: boolean;
-    Turn?: {
-        UserID: string | number;
-    };
+// Helper types for frontend state management
+export interface AuthState {
+    token: string | null;
+    user: User | null;
 }

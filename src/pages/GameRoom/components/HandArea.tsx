@@ -25,7 +25,7 @@ export const HandArea = ({ hand, username, isMyTurn, toggleCard, isSelected, onD
                 {hand.length > 0 ? (
                     hand.map((card, i) => (
                         <Card
-                            key={`${card.Suit ?? card.suit}-${card.Rank ?? card.rank}-${i}`}
+                            key={`${card.id}-${i}`}
                             card={card}
                             onClick={() => toggleCard(card)}
                             isSelected={isSelected(card)}
