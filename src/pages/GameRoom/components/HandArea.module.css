@@ -84,3 +84,8 @@
 .card:active {
     cursor: grabbing;
 }
+
+.passButton {
+    margin-left: 1rem;
+    background-color: #f44336;
+}

@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { Card as CardType } from '../../../types';
 import { Card } from '../../../components/Card/Card';
 import styles from './HandArea.module.css';
@@ -75,15 +76,27 @@ export const HandArea = ({
 
       {/* 手札リスト */}
       <div className={styles.handList}>
-        {sortedHand.map((c) => (
-          <Card
-            key={c.id}
-            card={c}
-            isSelected={selectedCardIds.includes(c.id)}
-            onClick={() => onToggleSelection(c.id)}
-            onDragStart={isMyTurn ? (e) => handleDragStart(e, c.id) : undefined}
-          />
-        ))}
+        <AnimatePresence>
+          {sortedHand.map((c) => (
+            <motion.div
+              key={c.id} // key
+              layout // 位置が変更されたときのアニメーションが自動で付く
+              initial={{ opacity: 0, scale: 0.8 }} // 出現時のアニメーション
+              animate={{ opacity: 1, scale: 1 }}   // 表示中の状態
+              exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }} // 消えるときのアニメーション
+              transition={{ type: "spring", damping: 25, stiffness: 300 }} // バネのような動き
+              style={{ display: 'inline-block' }} // ラッパーのスタイル調整
+            >
+              <Card
+                key={c.id}
+                card={c}
+                isSelected={selectedCardIds.includes(c.id)}
+                onClick={() => onToggleSelection(c.id)}
+                onDragStart={isMyTurn ? (e) => handleDragStart(e, c.id) : undefined}
+              />
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
     </div>
   );
