@@ -4,13 +4,13 @@ import { getRoom, startGame, playCard, pass } from '../../features/game/api/game
 import type { Room } from '../../types';
 import { STORAGE_KEY_TOKEN } from '../../lib/graphql';
 
-// コンポーネントのインポート
 import { GameHeader } from './components/GameHeader';
 import { OpponentArea } from './components/OpponentArea';
 import { TableArea } from './components/TableArea';
 import { HandArea } from './components/HandArea';
 
-// ID取得ヘルパー
+import styles from './GameRoom.module.css';
+
 const getMyUserId = () => {
   const token = localStorage.getItem(STORAGE_KEY_TOKEN);
   if (!token) return null;
@@ -34,40 +34,31 @@ export const GameRoom = () => {
 
   const myUserId = getMyUserId();
 
-  // 部屋情報の取得
   const fetchRoom = useCallback(async () => {
-    // ★ここを修正: roomIdがない場合もローディングを解除してエラーにする
     if (!roomId) {
-      console.error("Room ID not found in URL parameters.");
       setError("URLが無効です（部屋IDが見つかりません）");
       setLoading(false);
       return;
     }
 
     try {
-      console.log(`Fetching room data for ID: ${roomId}...`); // デバッグログ
       const data = await getRoom(roomId);
-      console.log("Fetched Room Data:", data); // デバッグログ
       setRoom(data);
       setError(null);
     } catch (err: any) {
-      console.error("Fetch Error Details:", err);
-      // エラーメッセージを表示
+      console.error(err);
       setError(err.message || "情報の取得に失敗しました");
     } finally {
-      // ★必ずローディングを解除
       setLoading(false);
     }
   }, [roomId]);
 
-  // ポーリング
   useEffect(() => {
     fetchRoom();
     const interval = setInterval(fetchRoom, 2000);
     return () => clearInterval(interval);
   }, [fetchRoom]);
 
-  // カード選択ロジック
   const toggleCardSelection = (cardId: number) => {
     setSelectedCardIds(prev => 
       prev.includes(cardId) ? prev.filter(id => id !== cardId) : [...prev, cardId]
@@ -80,13 +71,19 @@ export const GameRoom = () => {
     catch (err: any) { alert('開始エラー: ' + err.message); }
   };
 
-  const handlePlayCard = async () => {
-    if (!roomId || selectedCardIds.length === 0) return;
+  // ドロップされたときに呼ばれる
+  const handleDropCards = async () => {
+    if (!roomId || selectedCardIds.length === 0) {
+      alert("カードを選択してからドロップしてください");
+      return;
+    }
     try {
       await playCard(roomId, selectedCardIds);
       setSelectedCardIds([]);
       fetchRoom();
-    } catch (err: any) { alert('カードを出せません: ' + err.message); }
+    } catch (err: any) { 
+      alert('カードを出せません: ' + err.message); 
+    }
   };
 
   const handlePass = async () => {
@@ -95,57 +92,46 @@ export const GameRoom = () => {
     catch (err: any) { alert('パスエラー: ' + err.message); }
   };
 
-  if (loading) return (
-    <div style={{ padding: '2rem', textAlign: 'center' }}>
-      <h2>読み込み中...</h2>
-      <p>部屋ID: {roomId || '不明'}</p>
-    </div>
-  );
-
+  if (loading) return <div className={styles.loading}>読み込み中... (ID: {roomId})</div>;
+  
   if (error) return (
-    <div style={{ padding: '2rem', color: 'red', textAlign: 'center' }}>
+    <div className={styles.error}>
       <h2>エラーが発生しました</h2>
       <p>{error}</p>
       <button onClick={() => navigate('/')}>ロビーに戻る</button>
     </div>
   );
 
-  if (!room) return <div style={{ padding: '2rem' }}>部屋データがありません</div>;
+  if (!room) return <div className={styles.loading}>部屋データがありません</div>;
 
   const isOwner = myUserId === String(room.ownerID);
   const isGameStarted = !!room.game;
 
-  // プレイヤー情報の抽出
   const myPlayer = room.game?.players.find(p => String(p.userID) === myUserId);
   const opponents = room.game?.players.filter(p => String(p.userID) !== myUserId) || [];
   const turnPlayer = room.game?.players[room.game.turn];
-  const isMyTurn = isGameStarted && turnPlayer?.userID === myUserId;
+  
+  const isMyTurn = isGameStarted && String(turnPlayer?.userID) === String(myUserId);
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
+    <div className={styles.container}>
       <GameHeader room={room} />
 
       {!isGameStarted ? (
-        <div style={{ textAlign: 'center', marginTop: '3rem' }}>
+        <div className={styles.waiting}>
           <h2>待機中... ({room.memberIDs.length}人参加中)</h2>
           {isOwner ? (
             <button 
               onClick={handleStartGame}
               disabled={room.memberIDs.length < 2}
-              style={{ 
-                padding: '1rem 2rem', 
-                fontSize: '1.2rem', 
-                cursor: room.memberIDs.length < 2 ? 'not-allowed' : 'pointer', 
-                backgroundColor: room.memberIDs.length < 2 ? '#ccc' : '#4CAF50', 
-                color: 'white', border: 'none', borderRadius: '4px' 
-              }}
+              className={styles.startButton}
             >
               ゲーム開始
             </button>
           ) : (
             <p>ホストが開始するのを待っています...</p>
           )}
-          {room.memberIDs.length < 2 && <p style={{color:'red'}}>開始するには2人以上必要です</p>}
+          {room.memberIDs.length < 2 && <p className={styles.warning}>開始するには2人以上必要です</p>}
         </div>
       ) : (
         <>
@@ -157,14 +143,15 @@ export const GameRoom = () => {
           <TableArea 
             cards={room.game?.fieldCards || []} 
             isRevolution={!!room.game?.isRevolution} 
+            onDropCards={handleDropCards}
+            isMyTurn={isMyTurn}
           />
           
           <HandArea 
             hand={myPlayer?.hand || []}
             selectedCardIds={selectedCardIds}
             onToggleSelection={toggleCardSelection}
-            isMyTurn={isMyTurn || false}
-            onPlay={handlePlayCard}
+            isMyTurn={isMyTurn}
             onPass={handlePass}
             turnPlayerName={turnPlayer?.user?.name}
           />

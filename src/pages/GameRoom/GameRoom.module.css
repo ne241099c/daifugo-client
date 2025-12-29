@@ -1,18 +1,40 @@
 .container {
-	max-width: 1200px;
-	width: 95%;
-	margin: 0 auto;
-	padding: 20px;
-	text-align: center;
-	min-height: 100vh;
-	background-color: white;
-	padding-bottom: 50px;
+  padding: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
-/* デバッグ表示エリア */
-.debug {
-	margin-top: 30px;
-	text-align: left;
-	font-size: 0.8em;
-	opacity: 0.7;
+.loading, .error {
+  padding: 2rem;
+  text-align: center;
+}
+
+.error {
+  color: red;
+}
+
+.waiting {
+  text-align: center;
+  margin-top: 3rem;
+}
+
+.startButton {
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  cursor: pointer;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  margin-top: 1rem;
+}
+
+.startButton:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.warning {
+  color: red;
+  margin-top: 0.5rem;
 }

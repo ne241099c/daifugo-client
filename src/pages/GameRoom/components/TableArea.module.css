@@ -1,24 +1,64 @@
-.tableArea {
-  min-height: 150px;
-  margin: 20px auto;
-  padding: 20px;
-  background-color: rgba(0, 50, 0, 0.5);
-  border: 2px dashed #8bc34a;
-  border-radius: 10px;
+.table {
+  padding: 2rem;
+  background: #2e7d32;
+  min-height: 200px;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: white;
+  position: relative;
+  transition: background-color 0.3s;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+}
+
+.dragOver {
+  background: #4caf50;
+  border: 4px dashed #fff;
+}
+
+.title {
+  margin: 0 0 1rem 0;
+  opacity: 0.8;
+}
+
+.revolution {
+  color: #ffeb3b;
+  font-weight: bold;
+  margin-left: 0.5rem;
+}
+
+.cardsContainer {
+  display: flex;
+  justify-content: center;
   gap: 10px;
-  transition: background-color 0.2s;
 }
 
-.tableAreaActive {
-  background-color: rgba(0, 100, 0, 0.6);
-  border-color: #fff;
-  transform: scale(1.02);
+.card {
+  border: 1px solid #999;
+  background: white;
+  color: black;
+  padding: 1rem;
+  border-radius: 4px;
+  min-width: 50px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
-.noCards {
-  color: #ddd;
-  opacity: 0.5;
+.suit {
+  font-size: 0.8rem;
+}
+
+.rank {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.dropMessage {
+  margin-top: 1rem;
+  font-weight: bold;
+  background: rgba(0,0,0,0.2);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
 }

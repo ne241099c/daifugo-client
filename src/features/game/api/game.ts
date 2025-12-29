@@ -61,6 +61,12 @@ const PASS_MUTATION = `
   }
 `;
 
+const LEAVE_ROOM_MUTATION = `
+  mutation LeaveRoom($roomID: ID!) {
+    leaveRoom(roomID: $roomID)
+  }
+`;
+
 export const getRoom = async (id: string): Promise<Room> => {
   const data = await request<{ room: Room }>(GET_ROOM_QUERY, { id });
   return data.room;
@@ -79,4 +85,9 @@ export const playCard = async (roomID: string, cardIDs: number[]): Promise<Room>
 export const pass = async (roomID: string): Promise<Room> => {
   const data = await request<{ pass: Room }>(PASS_MUTATION, { roomID });
   return data.pass;
+};
+
+export const leaveRoom = async (roomID: string): Promise<boolean> => {
+  const data = await request<{ leaveRoom: boolean }>(LEAVE_ROOM_MUTATION, { roomID });
+  return data.leaveRoom;
 };

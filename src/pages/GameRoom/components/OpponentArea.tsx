@@ -1,4 +1,5 @@
 import type { Player } from '../../../types';
+import styles from './OpponentArea.module.css';
 
 interface Props {
   players: Player[];
@@ -7,24 +8,17 @@ interface Props {
 
 export const OpponentArea = ({ players, turnUserID }: Props) => {
   return (
-    <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+    <div className={styles.container}>
       {players.map((p) => {
         const isTurn = p.userID === turnUserID;
         return (
           <div 
             key={p.userID} 
-            style={{ 
-              border: isTurn ? '2px solid #2196F3' : '1px solid #ccc',
-              borderRadius: '8px',
-              padding: '1rem',
-              minWidth: '120px',
-              backgroundColor: isTurn ? '#e3f2fd' : 'white',
-              textAlign: 'center'
-            }}
+            className={`${styles.card} ${isTurn ? styles.active : ''}`}
           >
-            <div style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>{p.user?.name || 'Unknown'}</div>
-            <div style={{ fontSize: '0.9rem' }}>手札: {p.hand?.length ?? '?'}枚</div>
-            <div style={{ fontSize: '0.9rem' }}>順位: {p.rank > 0 ? `${p.rank}位` : '-'}</div>
+            <div className={styles.name}>{p.user?.name || 'Unknown'}</div>
+            <div className={styles.info}>手札: {p.hand?.length ?? '?'}枚</div>
+            <div className={styles.info}>順位: {p.rank > 0 ? `${p.rank}位` : '-'}</div>
           </div>
         );
       })}
