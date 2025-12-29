@@ -1,63 +1,23 @@
+import { useNavigate } from 'react-router-dom';
+import type { Room } from '../../../types';
 import styles from './GameHeader.module.css';
 
-interface GameHeaderProps {
-    roomID: string;
-    username: string;
-    isActive: boolean | undefined;
-    isMyTurn: boolean | undefined;
-    isRevolution: boolean | undefined;
-    onStart: () => void;
-    onPass: () => void;
-    logout: () => void;
+interface Props {
+  room: Room;
 }
 
-export const GameHeader = ({ roomID, username, isActive, isMyTurn, isRevolution, onStart, onPass, logout }: GameHeaderProps) => {
-    return (
-        <header className={styles.header}>
-            <div className={styles.roomInfo}>
-                <h1>Room: {roomID}</h1>
-                <span className={styles.playerInfo}>Player: {username}</span>
-            </div>
+export const GameHeader = ({ room }: Props) => {
+  const navigate = useNavigate();
 
-            {isRevolution && (
-                <div className={styles.revolutionBadge}>
-                    ⚠️ 革命中 ⚠️
-                </div>
-            )}
-
-            <div className={styles.actionArea}>
-                {/* 開始ボタン */}
-                {!isActive && (
-                    <button
-                        className={`${styles.button} ${styles.startButton}`}
-                        onClick={onStart}
-                    >
-                        ▶ ゲーム開始
-                    </button>
-                )}
-
-                {/* パスボタン */}
-                {isActive && (
-                    <button
-                        onClick={onPass}
-                        disabled={!isMyTurn}
-                        className={`
-                            ${styles.button} 
-                            ${isMyTurn ? styles.passButton : styles.passButtonDisabled}
-                        `}
-                    >
-                        パス
-                    </button>
-                )}
-
-                {/* 退出ボタン */}
-                <button
-                    className={`${styles.button} ${styles.logoutButton}`}
-                    onClick={logout}
-                >
-                    退出
-                </button>
-            </div>
-        </header>
-    );
+  return (
+    <header style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem', borderBottom: '1px solid #ccc', paddingBottom: '1rem' }}>
+      <div>
+        <h1 style={{ margin: 0, fontSize: '1.5rem' }}>部屋: {room.name}</h1>
+        <p style={{ margin: 0, color: '#666' }}>ID: {room.id} / 参加者: {room.memberIDs.length}人</p>
+      </div>
+      <button onClick={() => navigate('/')} style={{ height: 'fit-content', padding: '0.5rem 1rem' }}>
+        ロビーへ戻る
+      </button>
+    </header>
+  );
 };

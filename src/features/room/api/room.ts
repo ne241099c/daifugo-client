@@ -25,7 +25,6 @@ const CREATE_ROOM_MUTATION = `
   }
 `;
 
-// 引数名が roomID になっています
 const JOIN_ROOM_MUTATION = `
   mutation JoinRoom($roomID: ID!) {
     joinRoom(roomID: $roomID) {

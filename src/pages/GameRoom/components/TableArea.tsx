@@ -1,33 +1,47 @@
-import styles from './TableArea.module.css';
-import { Card } from '../../../components/Card/Card';
-import type { Card as CardType } from '../../../types';
+import type { Card } from '../../../types';
 
-interface TableAreaProps {
-    tableCards: CardType[];
-    isDragOver: boolean;
-    onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
-    onDragLeave: () => void;
-    onDrop: (e: React.DragEvent<HTMLDivElement>) => void;
+interface Props {
+  cards: Card[];
+  isRevolution: boolean;
 }
 
-export const TableArea = ({ tableCards, isDragOver, onDragOver, onDragLeave, onDrop }: TableAreaProps) => {
-    return (
-        <div>
-            <h3>テーブル</h3>
-            <div
-                className={`${styles.tableArea} ${isDragOver ? styles.tableAreaActive : ''}`}
-                onDragOver={onDragOver}
-                onDragLeave={onDragLeave}
-                onDrop={onDrop}
+export const TableArea = ({ cards, isRevolution }: Props) => {
+  return (
+    <div style={{ 
+      padding: '2rem', 
+      background: '#2e7d32', // 緑色のマット風
+      minHeight: '160px', 
+      borderRadius: '8px', 
+      marginBottom: '2rem', 
+      textAlign: 'center',
+      color: 'white',
+      position: 'relative'
+    }}>
+      <h3 style={{ margin: '0 0 1rem 0', opacity: 0.8 }}>場のカード {isRevolution && <span style={{color: '#ffeb3b'}}>【革命中】</span>}</h3>
+      
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
+        {cards.length === 0 ? (
+          <p style={{ opacity: 0.5 }}>カードはありません</p>
+        ) : (
+          cards.map((c) => (
+            <div 
+              key={c.id} 
+              style={{ 
+                border: '1px solid #999', 
+                background: 'white', 
+                color: 'black',
+                padding: '1rem', 
+                borderRadius: '4px', 
+                minWidth: '50px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
+              }}
             >
-                {tableCards.length > 0 ? (
-                    tableCards.map((card, i) => (
-                        <Card key={`table-${i}`} card={card} isSelected={false} />
-                    ))
-                ) : (
-                    <span className={styles.noCards}>No Cards</span>
-                )}
+              <div style={{ fontSize: '0.8rem' }}>{c.suit}</div>
+              <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{c.rank}</div>
             </div>
-        </div>
-    );
+          ))
+        )}
+      </div>
+    </div>
+  );
 };

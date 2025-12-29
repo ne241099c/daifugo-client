@@ -1,52 +1,33 @@
-import styles from './OpponentArea.module.css';
 import type { Player } from '../../../types';
 
-interface OpponentAreaProps {
-    allPlayers: Player[];
-    currentTurnID: string | number;
-    username: string;
-    isActive: boolean;
+interface Props {
+  players: Player[];
+  turnUserID?: string;
 }
 
-export const OpponentArea = ({ allPlayers, currentTurnID, username, isActive }: OpponentAreaProps) => {
-    const players = allPlayers;
-    return (
-        <div className={styles.container}>
-            {players.map((p, i) => {
-                const isTurn = isActive && (p.id === currentTurnID);
-                const isMe = p.name === username;
-
-                const rank = p.rank ?? 0;
-
-                const cardClass = `
-                    ${styles.opponentCard} 
-                    ${isTurn ? styles.activeTurn : ''}
-                    ${rank > 0 ? styles.finished : ''}
-                `;
-
-                return (
-                    <div key={i} className={cardClass}>
-                        <div style={{ textAlign: 'center', marginTop: '5px' }}>
-                            <div className={styles.handCount}>
-                                🂠 {p.hand_count}
-                            </div>
-                            <div className={isTurn ? styles.nameActive : styles.name}>
-                                {isMe ? `You (${p.name})` : p.name}
-                            </div>
-                        </div>
-
-                        {isTurn && (
-                            <div className={styles.thinking}>Thinking...</div>
-                        )}
-
-                        {rank > 0 && (
-                            <div className={styles.rankBadge}>
-                                {rank}位
-                            </div>
-                        )}
-                    </div>
-                );
-            })}
-        </div>
-    );
+export const OpponentArea = ({ players, turnUserID }: Props) => {
+  return (
+    <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+      {players.map((p) => {
+        const isTurn = p.userID === turnUserID;
+        return (
+          <div 
+            key={p.userID} 
+            style={{ 
+              border: isTurn ? '2px solid #2196F3' : '1px solid #ccc',
+              borderRadius: '8px',
+              padding: '1rem',
+              minWidth: '120px',
+              backgroundColor: isTurn ? '#e3f2fd' : 'white',
+              textAlign: 'center'
+            }}
+          >
+            <div style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>{p.user?.name || 'Unknown'}</div>
+            <div style={{ fontSize: '0.9rem' }}>手札: {p.hand?.length ?? '?'}枚</div>
+            <div style={{ fontSize: '0.9rem' }}>順位: {p.rank > 0 ? `${p.rank}位` : '-'}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
 };

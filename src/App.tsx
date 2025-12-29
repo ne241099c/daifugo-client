@@ -2,7 +2,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Login } from './features/auth/routes/Login';
 import { Lobby } from './features/room/routes/Lobby';
-import { GameRoom } from './features/game/routes/GameRoom';
+import { GameRoom } from './pages/GameRoom/GameRoom';
 import { STORAGE_KEY_TOKEN } from './lib/graphql';
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -24,7 +24,7 @@ function App() {
           </PrivateRoute>
         } />
         {/* ★修正: GameRoomコンポーネントを使用 */}
-        <Route path="/room/:roomID" element={
+        <Route path="/room/:roomId" element={
           <PrivateRoute>
             <GameRoom />
           </PrivateRoute>

@@ -45,7 +45,6 @@ const START_GAME_MUTATION = `
   }
 `;
 
-// ★修正: 引数名 cardIDs (複数形ID)
 const PLAY_CARD_MUTATION = `
   mutation PlayCard($roomID: ID!, $cardIDs: [Int!]!) {
     playCard(roomID: $roomID, cardIDs: $cardIDs) {
