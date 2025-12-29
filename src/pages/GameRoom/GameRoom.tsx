@@ -38,10 +38,10 @@ export const GameScreen = ({ room, username, onStart, onPlay, onPass, logout }: 
     // Or just rely on `game` being present for active state.
     
     // Find my hand
-    // Need to map `members` to `game.players` to find `userId`.
-    // `username` is passed prop. Find userId from `room.members`.
+    // Need to map `members` to `game.players` to find `userID`.
+    // `username` is passed prop. Find userID from `room.members`.
     const me = room.members.find(m => m.name === username);
-    const myPlayer = game?.players.find(p => p.userId === me?.id);
+    const myPlayer = game?.players.find(p => p.userID === me?.id);
     const hand = myPlayer?.hand || [];
     
     const tableCards = game?.fieldCards || [];
@@ -49,12 +49,12 @@ export const GameScreen = ({ room, username, onStart, onPlay, onPass, logout }: 
     // Is my turn?
     // `game.turn` is an index? Or a user ID?
     // Backend schema: `turn: Int!`. Probably index in `players` array.
-    const isMyTurn = game ? game.players[game.turn]?.userId === me?.id : false;
+    const isMyTurn = game ? game.players[game.turn]?.userID === me?.id : false;
     
     const allPlayers = room.members.map(m => {
         // Find game player state
-        const gp = game?.players.find(p => p.userId === m.id);
-        const finished = game?.finishedPlayers?.find(p => p.userId === m.id);
+        const gp = game?.players.find(p => p.userID === m.id);
+        const finished = game?.finishedPlayers?.find(p => p.userID === m.id);
         
         // Map to old "Player" interface style for OpponentArea compatibility or update OpponentArea
         // Old Player: { id, name, rank, hand_count }
@@ -68,7 +68,7 @@ export const GameScreen = ({ room, username, onStart, onPlay, onPass, logout }: 
         } as Player;
     });
 
-    const currentTurnID = game ? game.players[game.turn]?.userId : null;
+    const currentTurnID = game ? game.players[game.turn]?.userID : null;
     const isRevolution = game?.isRevolution || false;
 
     // ... (rest of drag and drop logic is same, but updated for Card type)
