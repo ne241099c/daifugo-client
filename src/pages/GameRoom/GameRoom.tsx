@@ -31,8 +31,16 @@ export const GameRoom = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCardIds, setSelectedCardIds] = useState<number[]>([]);
+  
+  const [systemMessage, setSystemMessage] = useState<string | null>(null);
 
   const myUserId = getMyUserId();
+
+  // メッセージ表示ヘルパー
+  const showMessage = (msg: string) => {
+    setSystemMessage(msg);
+    setTimeout(() => setSystemMessage(null), 3000);
+  };
 
   const fetchRoom = useCallback(async () => {
     if (!roomId) {
@@ -68,13 +76,12 @@ export const GameRoom = () => {
   const handleStartGame = async () => {
     if (!roomId) return;
     try { await startGame(roomId); fetchRoom(); } 
-    catch (err: any) { alert('開始エラー: ' + err.message); }
+    catch (err: any) { showMessage('開始エラー: ' + err.message); }
   };
 
-  // ドロップされたときに呼ばれる
   const handleDropCards = async () => {
     if (!roomId || selectedCardIds.length === 0) {
-      alert("カードを選択してからドロップしてください");
+      showMessage("カードを選択してからドロップしてください");
       return;
     }
     try {
@@ -82,14 +89,23 @@ export const GameRoom = () => {
       setSelectedCardIds([]);
       fetchRoom();
     } catch (err: any) { 
-      alert('カードを出せません: ' + err.message); 
+      // ★アラートではなくメッセージ表示
+      showMessage('出せません: ' + err.message); 
     }
   };
 
   const handlePass = async () => {
-    if (!roomId || !confirm("パスしますか？")) return;
-    try { await pass(roomId); fetchRoom(); } 
-    catch (err: any) { alert('パスエラー: ' + err.message); }
+    if (!roomId) return;
+    // ★確認ダイアログを削除
+    // if (!confirm("パスしますか？")) return;
+    try { 
+      await pass(roomId); 
+      fetchRoom();
+      showMessage("パスしました");
+    } 
+    catch (err: any) { 
+      showMessage('パスエラー: ' + err.message); 
+    }
   };
 
   if (loading) return <div className={styles.loading}>読み込み中... (ID: {roomId})</div>;
@@ -112,10 +128,14 @@ export const GameRoom = () => {
   const turnPlayer = room.game?.players[room.game.turn];
   
   const isMyTurn = isGameStarted && String(turnPlayer?.userID) === String(myUserId);
+  const isRevolution = !!room.game?.isRevolution;
 
   return (
     <div className={styles.container}>
-      <GameHeader room={room} />
+      {/* ★メッセージ表示エリア */}
+      {systemMessage && <div className={styles.systemMessage}>{systemMessage}</div>}
+
+      <GameHeader room={room} isRevolution={isRevolution} />
 
       {!isGameStarted ? (
         <div className={styles.waiting}>
@@ -142,7 +162,6 @@ export const GameRoom = () => {
           
           <TableArea 
             cards={room.game?.fieldCards || []} 
-            isRevolution={!!room.game?.isRevolution} 
             onDropCards={handleDropCards}
             isMyTurn={isMyTurn}
           />

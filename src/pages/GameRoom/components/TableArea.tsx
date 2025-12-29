@@ -4,12 +4,13 @@ import styles from './TableArea.module.css';
 
 interface Props {
   cards: Card[];
-  isRevolution: boolean;
+  // isRevolution: boolean; // ← 削除
   onDropCards: () => void;
   isMyTurn: boolean;
 }
 
-export const TableArea = ({ cards, isRevolution, onDropCards, isMyTurn }: Props) => {
+// 引数からも isRevolution を削除
+export const TableArea = ({ cards, onDropCards, isMyTurn }: Props) => {
   const [isDragOver, setIsDragOver] = useState(false);
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -31,6 +32,16 @@ export const TableArea = ({ cards, isRevolution, onDropCards, isMyTurn }: Props)
     }
   };
 
+  const getRankDisplay = (suit: string, rank: number) => {
+    if (suit === 'Joker') return ''; 
+    if (rank === 0) return '';
+    if (rank === 1) return 'A';
+    if (rank === 11) return 'J';
+    if (rank === 12) return 'Q';
+    if (rank === 13) return 'K';
+    return String(rank);
+  };
+
   return (
     <div 
       className={`${styles.table} ${isDragOver ? styles.dragOver : ''}`}
@@ -39,8 +50,7 @@ export const TableArea = ({ cards, isRevolution, onDropCards, isMyTurn }: Props)
       onDrop={handleDrop}
     >
       <h3 className={styles.title}>
-        場のカード 
-        {isRevolution && <span className={styles.revolution}>【革命中】</span>}
+        場のカード
       </h3>
       
       <div className={styles.cardsContainer}>
@@ -50,7 +60,7 @@ export const TableArea = ({ cards, isRevolution, onDropCards, isMyTurn }: Props)
           cards.map((c) => (
             <div key={c.id} className={styles.card}>
               <div className={styles.suit}>{c.suit}</div>
-              <div className={styles.rank}>{c.rank}</div>
+              <div className={styles.rank}>{getRankDisplay(c.suit, c.rank)}</div>
             </div>
           ))
         )}

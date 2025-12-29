@@ -38,3 +38,26 @@
   color: red;
   margin-top: 0.5rem;
 }
+
+/* 一時メッセージ用 */
+.systemMessage {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(50, 50, 50, 0.9);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 30px;
+  z-index: 1000;
+  font-weight: bold;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  animation: fadeInOut 3s forwards;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translate(-50%, -20px); }
+  10% { opacity: 1; transform: translate(-50%, 0); }
+  80% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, -20px); }
+}

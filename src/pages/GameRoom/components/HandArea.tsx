@@ -27,9 +27,18 @@ export const HandArea = ({
     e.dataTransfer.setData('text/plain', String(cardId));
   };
 
+  const getRankDisplay = (suit: string, rank: number) => {
+    if (suit === 'Joker') return ''; 
+    if (rank === 0) return '';
+    if (rank === 1) return 'A';
+    if (rank === 11) return 'J';
+    if (rank === 12) return 'Q';
+    if (rank === 13) return 'K';
+    return String(rank);
+  };
+
   return (
     <div className={styles.container}>
-      {/* 操作パネル */}
       <div className={`${styles.controls} ${isMyTurn ? styles.myTurn : styles.notMyTurn}`}>
         <h3 className={`${styles.statusText} ${isMyTurn ? styles.active : ''}`}>
           {isMyTurn 
@@ -46,7 +55,6 @@ export const HandArea = ({
         </button>
       </div>
 
-      {/* 手札リスト */}
       <div className={styles.handList}>
         {hand.map((c) => {
           const isSelected = selectedCardIds.includes(c.id);
@@ -59,7 +67,9 @@ export const HandArea = ({
               className={`${styles.card} ${isSelected ? styles.selected : ''}`}
             >
               <div style={{ fontSize: '0.8rem', color: '#555' }}>{c.suit}</div>
-              <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{c.rank}</div>
+              <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
+                {getRankDisplay(c.suit, c.rank)}
+              </div>
             </div>
           );
         })}

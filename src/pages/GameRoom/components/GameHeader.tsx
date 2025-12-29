@@ -5,9 +5,10 @@ import styles from './GameHeader.module.css';
 
 interface Props {
   room: Room;
+  isRevolution: boolean; // 追加
 }
 
-export const GameHeader = ({ room }: Props) => {
+export const GameHeader = ({ room, isRevolution }: Props) => {
   const navigate = useNavigate();
 
   const handleLeave = async () => {
@@ -21,9 +22,9 @@ export const GameHeader = ({ room }: Props) => {
   };
 
   return (
-    <header className={styles.header}>
+    <header className={`${styles.header} ${isRevolution ? styles.revolution : ''}`}>
       <div className={styles.title}>
-        <h1>部屋: {room.name}</h1>
+        <h1>部屋: {room.name} {isRevolution && <span style={{color:'red', fontSize:'0.8em'}}>（革命中！）</span>}</h1>
         <p>ID: {room.id} / 参加者: {room.memberIDs.length}人</p>
       </div>
       <div className={styles.actions}>

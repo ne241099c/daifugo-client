@@ -4,7 +4,13 @@
   align-items: center;
   margin-bottom: 2rem;
   border-bottom: 1px solid #ccc;
-  padding-bottom: 1rem;
+  transition: background-color 0.5s ease;
+}
+
+/* 革命中のスタイル */
+.revolution {
+  background-color: #ffebee;
+  border-bottom: 2px solid #f44336;
 }
 
 .title h1 {
