@@ -49,7 +49,6 @@ export const Lobby = () => {
       navigate(`/room/${room.id}`);
     } catch (error: any) {
       console.error('部屋参加エラー詳細:', error);
-      // エラーメッセージを表示してデバッグしやすくする
       alert(`部屋への参加に失敗しました: ${error.message || '不明なエラー'}`);
     }
   };
@@ -57,7 +56,7 @@ export const Lobby = () => {
   return (
     <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h1>ゲームロビー</h1>
+        <h1>大富豪Lobby</h1>
         <button onClick={logout} style={{ padding: '0.5rem 1rem', cursor: 'pointer' }}>ログアウト</button>
       </header>
 

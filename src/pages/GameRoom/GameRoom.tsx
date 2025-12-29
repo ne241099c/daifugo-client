@@ -31,7 +31,7 @@ export const GameRoom = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCardIds, setSelectedCardIds] = useState<number[]>([]);
-  
+
   const [systemMessage, setSystemMessage] = useState<string | null>(null);
 
   const myUserId = getMyUserId();
@@ -68,14 +68,14 @@ export const GameRoom = () => {
   }, [fetchRoom]);
 
   const toggleCardSelection = (cardId: number) => {
-    setSelectedCardIds(prev => 
+    setSelectedCardIds(prev =>
       prev.includes(cardId) ? prev.filter(id => id !== cardId) : [...prev, cardId]
     );
   };
 
   const handleStartGame = async () => {
     if (!roomId) return;
-    try { await startGame(roomId); fetchRoom(); } 
+    try { await startGame(roomId); fetchRoom(); }
     catch (err: any) { showMessage('開始エラー: ' + err.message); }
   };
 
@@ -88,9 +88,9 @@ export const GameRoom = () => {
       await playCard(roomId, selectedCardIds);
       setSelectedCardIds([]);
       fetchRoom();
-    } catch (err: any) { 
+    } catch (err: any) {
       // ★アラートではなくメッセージ表示
-      showMessage('出せません: ' + err.message); 
+      showMessage('出せません: ' + err.message);
     }
   };
 
@@ -98,18 +98,18 @@ export const GameRoom = () => {
     if (!roomId) return;
     // ★確認ダイアログを削除
     // if (!confirm("パスしますか？")) return;
-    try { 
-      await pass(roomId); 
+    try {
+      await pass(roomId);
       fetchRoom();
       showMessage("パスしました");
-    } 
-    catch (err: any) { 
-      showMessage('パスエラー: ' + err.message); 
+    }
+    catch (err: any) {
+      showMessage('パスエラー: ' + err.message);
     }
   };
 
   if (loading) return <div className={styles.loading}>読み込み中... (ID: {roomId})</div>;
-  
+
   if (error) return (
     <div className={styles.error}>
       <h2>エラーが発生しました</h2>
@@ -126,22 +126,24 @@ export const GameRoom = () => {
   const myPlayer = room.game?.players.find(p => String(p.userID) === myUserId);
   const opponents = room.game?.players.filter(p => String(p.userID) !== myUserId) || [];
   const turnPlayer = room.game?.players[room.game.turn];
-  
+
   const isMyTurn = isGameStarted && String(turnPlayer?.userID) === String(myUserId);
-  const isRevolution = !!room.game?.isRevolution;
+  const isRevolutionDB = !!room.game?.isRevolution;
+  const is11Back = room.game?.fieldCards.some(c => c.rank === 11) ?? false;
+  const isEffectiveRevolution = isRevolutionDB !== is11Back;
 
   return (
     <div className={styles.container}>
       {/* ★メッセージ表示エリア */}
       {systemMessage && <div className={styles.systemMessage}>{systemMessage}</div>}
 
-      <GameHeader room={room} isRevolution={isRevolution} />
+      <GameHeader room={room} isRevolution={isEffectiveRevolution} />
 
       {!isGameStarted ? (
         <div className={styles.waiting}>
           <h2>待機中... ({room.memberIDs.length}人参加中)</h2>
           {isOwner ? (
-            <button 
+            <button
               onClick={handleStartGame}
               disabled={room.memberIDs.length < 2}
               className={styles.startButton}
@@ -155,18 +157,18 @@ export const GameRoom = () => {
         </div>
       ) : (
         <>
-          <OpponentArea 
-            players={opponents} 
-            turnUserID={turnPlayer?.userID} 
+          <OpponentArea
+            players={opponents}
+            turnUserID={turnPlayer?.userID}
           />
-          
-          <TableArea 
-            cards={room.game?.fieldCards || []} 
+
+          <TableArea
+            cards={room.game?.fieldCards || []}
             onDropCards={handleDropCards}
             isMyTurn={isMyTurn}
           />
-          
-          <HandArea 
+
+          <HandArea
             hand={myPlayer?.hand || []}
             selectedCardIds={selectedCardIds}
             onToggleSelection={toggleCardSelection}

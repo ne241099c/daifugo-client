@@ -1,79 +1,85 @@
 .container {
-  margin-top: 2rem;
+    margin-top: 2rem;
+    width: 100%;
 }
 
 .controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-  padding: 0.5rem;
-  border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    border-radius: 4px;
 }
 
 .myTurn {
-  background-color: #e3f2fd;
+    background-color: #e3f2fd;
 }
 
 .notMyTurn {
-  background-color: #f5f5f5;
+    background-color: #f5f5f5;
 }
 
 .statusText {
-  margin: 0;
-  font-weight: bold;
+    margin: 0;
+    font-weight: bold;
 }
+
 .statusText.active {
-  color: #1976d2;
+    color: #1976d2;
 }
 
 .passButton {
-  padding: 0.5rem 1.5rem;
-  background-color: #9e9e9e;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
+    padding: 0.5rem 1.5rem;
+    background-color: #9e9e9e;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
 }
+
 .passButton:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+    background-color: #ccc;
+    cursor: not-allowed;
 }
+
 .passButton:hover:not(:disabled) {
-  background-color: #757575;
+    background-color: #757575;
 }
 
 .handList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding: 1rem 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 1rem 0;
+    width: 100%;
+    min-height: 100px;
 }
 
 .card {
-  border: 1px solid #ccc;
-  background: white;
-  padding: 0.8rem;
-  border-radius: 6px;
-  cursor: grab;
-  min-width: 45px;
-  text-align: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  transition: transform 0.2s, background-color 0.2s;
-  user-select: none;
+    border: 1px solid #ccc;
+    background: white;
+    padding: 0.8rem;
+    border-radius: 6px;
+    cursor: grab;
+    min-width: 45px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, background-color 0.2s;
+    user-select: none;
 }
 
 .selected {
-  border: 2px solid #2196F3;
-  background: #E3F2FD;
-  transform: translateY(-12px);
+    border: 2px solid #2196F3;
+    background: #E3F2FD;
+    transform: translateY(-12px);
 }
 
 .card:hover {
-  background-color: #f9f9f9;
+    background-color: #f9f9f9;
 }
 
 .card:active {
-  cursor: grabbing;
+    cursor: grabbing;
 }

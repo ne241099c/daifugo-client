@@ -1,40 +1,42 @@
-/* カードの基本形 */
+/* カードの基本形（レイアウトのみ） */
 .card {
     border: 1px solid #999;
     border-radius: 6px;
     width: 60px;
     height: 90px;
+    aspect-ratio: 2 / 3;
+    flex-shrink: 0;
+    
     background-color: white;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    cursor: grab;
-    /* 掴めるアイコン */
+    
     font-size: 1.4em;
     font-weight: bold;
     user-select: none;
-    transition: all 0.2s ease;
-    /* アニメーション設定 */
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
 }
 
-.card:hover {
+.interactive {
+    cursor: grab;
+}
+.interactive:hover {
     transform: translateY(-5px);
-    /* 少し浮く */
     box-shadow: 2px 5px 8px rgba(0, 0, 0, 0.3);
 }
-
-.card:active {
+.interactive:active {
     cursor: grabbing;
 }
 
-/* 赤いカード（ハート・ダイヤ） */
+/* 赤いカード */
 .red {
     color: red;
 }
 
-/* 黒いカード（スペード・クラブ） */
+/* 黒いカード */
 .black {
     color: black;
 }
@@ -42,13 +44,8 @@
 /* 選択されている時の状態 */
 .selected {
     background-color: #e1f5fe;
-    /* 水色背景 */
     border-color: #039be5;
-    /* 青い枠線 */
     transform: translateY(-15px) !important;
-    /* グッと浮き上がる */
     box-shadow: 0 0 10px #039be5;
-    /* 青く光る */
     z-index: 10;
-    /* 他のカードより手前に表示 */
 }

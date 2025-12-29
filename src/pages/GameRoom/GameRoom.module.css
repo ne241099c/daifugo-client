@@ -1,63 +1,91 @@
 .container {
-  padding: 2rem;
-  max-width: 1000px;
-  margin: 0 auto;
+	padding: 2rem;
+	max-width: 1000px;
+	margin: 0 auto;
+	width: 95%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 }
 
-.loading, .error {
-  padding: 2rem;
-  text-align: center;
+.loading,
+.error {
+	padding: 2rem;
+	text-align: center;
 }
 
 .error {
-  color: red;
+	color: red;
 }
 
 .waiting {
-  text-align: center;
-  margin-top: 3rem;
+	text-align: center;
+	margin-top: 3rem;
 }
 
 .startButton {
-  padding: 1rem 2rem;
-  font-size: 1.2rem;
-  cursor: pointer;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  margin-top: 1rem;
+	padding: 1rem 2rem;
+	font-size: 1.2rem;
+	cursor: pointer;
+	background-color: #4CAF50;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	margin-top: 1rem;
 }
 
 .startButton:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+	background-color: #ccc;
+	cursor: not-allowed;
 }
 
 .warning {
-  color: red;
-  margin-top: 0.5rem;
+	color: red;
+	margin-top: 0.5rem;
 }
 
 /* 一時メッセージ用 */
 .systemMessage {
-  position: fixed;
-  top: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: rgba(50, 50, 50, 0.9);
-  color: white;
-  padding: 1rem 2rem;
-  border-radius: 30px;
-  z-index: 1000;
-  font-weight: bold;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-  animation: fadeInOut 3s forwards;
+	position: fixed;
+	top: 80px;
+	left: 50%;
+	transform: translateX(-50%);
+	background-color: rgba(50, 50, 50, 0.9);
+	color: white;
+	padding: 1rem 2rem;
+	border-radius: 30px;
+	z-index: 1000;
+	font-weight: bold;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+	animation: fadeInOut 3s forwards;
+}
+
+.debug {
+	margin-top: 30px;
+	text-align: left;
+	font-size: 0.8em;
+	opacity: 0.7;
+    width: 100%;
 }
 
 @keyframes fadeInOut {
-  0% { opacity: 0; transform: translate(-50%, -20px); }
-  10% { opacity: 1; transform: translate(-50%, 0); }
-  80% { opacity: 1; transform: translate(-50%, 0); }
-  100% { opacity: 0; transform: translate(-50%, -20px); }
+	0% {
+		opacity: 0;
+		transform: translate(-50%, -20px);
+	}
+
+	10% {
+		opacity: 1;
+		transform: translate(-50%, 0);
+	}
+
+	80% {
+		opacity: 1;
+		transform: translate(-50%, 0);
+	}
+
+	100% {
+		opacity: 0;
+		transform: translate(-50%, -20px);
+	}
 }

@@ -1,8 +1,9 @@
-import type { Card } from '../../../types';
+import type { Card as CardType } from '../../../types';
+import { Card } from '../../../components/Card/Card';
 import styles from './HandArea.module.css';
 
 interface Props {
-  hand: Card[];
+  hand: CardType[];
   selectedCardIds: number[];
   onToggleSelection: (cardId: number) => void;
   isMyTurn: boolean;
@@ -27,22 +28,13 @@ export const HandArea = ({
     e.dataTransfer.setData('text/plain', String(cardId));
   };
 
-  const getRankDisplay = (suit: string, rank: number) => {
-    if (suit === 'Joker') return ''; 
-    if (rank === 0) return '';
-    if (rank === 1) return 'A';
-    if (rank === 11) return 'J';
-    if (rank === 12) return 'Q';
-    if (rank === 13) return 'K';
-    return String(rank);
-  };
-
   return (
     <div className={styles.container}>
+      {/* 操作パネル */}
       <div className={`${styles.controls} ${isMyTurn ? styles.myTurn : styles.notMyTurn}`}>
         <h3 className={`${styles.statusText} ${isMyTurn ? styles.active : ''}`}>
           {isMyTurn 
-            ? "★ あなたの番です (カードを選んで場へドラッグ＆ドロップ)" 
+            ? "★ あなたの番です (ドラッグ＆ドロップで出す)" 
             : `待機中 (${turnPlayerName}の番)`}
         </h3>
         
@@ -55,24 +47,17 @@ export const HandArea = ({
         </button>
       </div>
 
+      {/* 手札リスト */}
       <div className={styles.handList}>
-        {hand.map((c) => {
-          const isSelected = selectedCardIds.includes(c.id);
-          return (
-            <div 
-              key={c.id} 
-              onClick={() => onToggleSelection(c.id)}
-              draggable={isMyTurn}
-              onDragStart={(e) => handleDragStart(e, c.id)}
-              className={`${styles.card} ${isSelected ? styles.selected : ''}`}
-            >
-              <div style={{ fontSize: '0.8rem', color: '#555' }}>{c.suit}</div>
-              <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
-                {getRankDisplay(c.suit, c.rank)}
-              </div>
-            </div>
-          );
-        })}
+        {hand.map((c) => (
+          <Card 
+            key={c.id}
+            card={c}
+            isSelected={selectedCardIds.includes(c.id)}
+            onClick={() => onToggleSelection(c.id)}
+            onDragStart={isMyTurn ? (e) => handleDragStart(e, c.id) : undefined}
+          />
+        ))}
       </div>
     </div>
   );
