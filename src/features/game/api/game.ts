@@ -67,6 +67,12 @@ const LEAVE_ROOM_MUTATION = `
   }
 `;
 
+const RESTART_GAME_MUTATION = `
+  mutation RestartGame($roomID: ID!) {
+    restartGame(roomID: $roomID) { id }
+  }
+`;
+
 export const getRoom = async (id: string): Promise<Room> => {
   const data = await request<{ room: Room }>(GET_ROOM_QUERY, { id });
   return data.room;
@@ -90,4 +96,9 @@ export const pass = async (roomID: string): Promise<Room> => {
 export const leaveRoom = async (roomID: string): Promise<boolean> => {
   const data = await request<{ leaveRoom: boolean }>(LEAVE_ROOM_MUTATION, { roomID });
   return data.leaveRoom;
+};
+
+export const restartGame = async (roomID: string): Promise<Room> => {
+  const data = await request<{ restartGame: Room }>(RESTART_GAME_MUTATION, { roomID });
+  return data.restartGame;
 };

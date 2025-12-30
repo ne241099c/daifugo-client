@@ -16,16 +16,6 @@ const LOGIN_MUTATION = `
   }
 `;
 
-const SIGNUP_MUTATION = `
-  mutation SignUp($name: String!, $email: String!, $password: String!) {
-    signUp(name: $name, email: $email, password: $password) {
-      id
-      name
-      email
-    }
-  }
-`;
-
 export const loginWithEmail = async (email: string, password: string): Promise<User> => {
   const data = await request<{ login: AuthPayload }>(LOGIN_MUTATION, { email, password });
   const { token, user } = data.login;
@@ -38,9 +28,9 @@ export const loginWithEmail = async (email: string, password: string): Promise<U
 
 const SIGN_UP_MUTATION = `
   mutation SignUp($name: String!, $email: String!, $password: String!) {
-    signUp(input: {name: $name, email: $email, password: $password}) {
-      token
-      user { id name }
+    signUp(in: {name: $name, email: $email, password: $password}) {
+      id
+      name
     }
   }
 `;
@@ -51,9 +41,9 @@ const DELETE_USER_MUTATION = `
   }
 `;
 
-export const registerWithEmail = async (name: string, email: string, password: string): Promise<User> => {
-  const data = await request<{ signUp: User }>(SIGNUP_MUTATION, { name, email, password });
-  return data.signUp;
+export const login = async (email: string, password: string): Promise<AuthPayload> => {
+  const data = await request<{ login: AuthPayload }>(LOGIN_MUTATION, { email, password });
+  return data.login;
 };
 
 export const logout = () => {
@@ -62,8 +52,9 @@ export const logout = () => {
 };
 
 export const signUp = async (name: string, email: string, password: string): Promise<AuthPayload> => {
-  const data = await request<{ signUp: AuthPayload }>(SIGN_UP_MUTATION, { name, email, password });
-  return data.signUp;
+  await request<{ signUp: { id: string, name: string } }>(SIGN_UP_MUTATION, { name, email, password });
+  
+  return await login(email, password);
 };
 
 export const deleteAccount = async (): Promise<boolean> => {

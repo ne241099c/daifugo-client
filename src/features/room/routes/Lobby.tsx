@@ -5,6 +5,8 @@ import type { Room } from '../../../types';
 import { logout } from '../../auth/api/auth';
 import { CreateRoomForm } from '../components/CreateRoomForm';
 import { RoomList } from '../components/RoomList';
+import { deleteAccount } from '../../auth/api/auth';
+import { STORAGE_KEY_TOKEN } from '../../../lib/graphql';
 
 export const Lobby = () => {
   const navigate = useNavigate();
@@ -41,7 +43,7 @@ export const Lobby = () => {
 
   const handleJoinRoom = async (roomID: string) => {
     if (!window.confirm(`部屋ID: ${roomID} に参加しますか？`)) return;
-    
+
     try {
       console.log(`Joining room ${roomID}...`);
       const room = await joinRoom(roomID);
@@ -53,19 +55,45 @@ export const Lobby = () => {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    if (!window.confirm("本当に退会しますか？\nこの操作は取り消せません。")) return;
+    try {
+      await deleteAccount();
+      localStorage.removeItem(STORAGE_KEY_TOKEN);
+      navigate('/login');
+    } catch (err: any) {
+      alert("退会に失敗しました: " + (err.message || "不明なエラー"));
+    }
+  };
+
   return (
     <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <h1>大富豪Lobby</h1>
         <button onClick={logout} style={{ padding: '0.5rem 1rem', cursor: 'pointer' }}>ログアウト</button>
+        <div style={{ marginTop: '50px', borderTop: '1px solid #ccc', paddingTop: '20px', textAlign: 'right' }}>
+          <button
+            onClick={handleDeleteAccount}
+            style={{
+              padding: '0.5rem 1rem',
+              cursor: 'pointer',
+              backgroundColor: '#ff4444',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px'
+            }}
+          >
+            退会
+          </button>
+        </div>
       </header>
 
       <CreateRoomForm onSubmit={handleCreateRoom} loading={loading} />
-      
-      <RoomList 
-        rooms={rooms} 
-        onJoin={handleJoinRoom} 
-        onRefresh={fetchRooms} 
+
+      <RoomList
+        rooms={rooms}
+        onJoin={handleJoinRoom}
+        onRefresh={fetchRooms}
       />
     </div>
   );

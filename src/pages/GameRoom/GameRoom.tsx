@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getRoom, startGame, playCard, pass } from '../../features/game/api/game';
+import { getRoom, startGame, playCard, pass, restartGame } from '../../features/game/api/game';
 import type { Room } from '../../types';
 import { STORAGE_KEY_TOKEN } from '../../lib/graphql';
 
@@ -8,9 +8,9 @@ import { GameHeader } from './components/GameHeader';
 import { OpponentArea } from './components/OpponentArea';
 import { TableArea } from './components/TableArea';
 import { HandArea } from './components/HandArea';
-import { deleteAccount } from '../../features/auth/api/auth';
 import { GameResult } from './components/GameResult';
 import { SpectatorArea } from './components/SpectatorArea';
+
 
 import styles from './GameRoom.module.css';
 
@@ -73,21 +73,11 @@ export const GameRoom = () => {
     }
   }, [room?.game?.isFinished]);
 
-  const handleDeleteAccount = async () => {
-    if (!confirm("本当に退会しますか？この操作は取り消せません。")) return;
-    try {
-      await deleteAccount();
-      localStorage.removeItem(STORAGE_KEY_TOKEN);
-      navigate('/login');
-    } catch (err: any) {
-      alert("退会に失敗しました");
-    }
-  };
 
   const handleRematch = async () => {
     if (!roomId) return;
     try {
-        await startGame(roomId); 
+        await restartGame(roomId);
         setShowResult(false);
         fetchRoom();
     } catch(err: any) {
