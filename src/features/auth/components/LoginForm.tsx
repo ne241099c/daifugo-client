@@ -30,33 +30,33 @@ export const LoginForm = ({ onSuccess }: LoginFormProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '300px', margin: '0 auto' }}>
+    <form onSubmit={handleSubmit} className="login-form">
       <h2>ログイン</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      
+      {error && <p className="error">{error}</p>}
+
       <div>
         <label>Email:</label>
-        <input 
-          type="email" 
-          value={email} 
-          onChange={(e) => setEmail(e.target.value)} 
-          required 
-          style={{ width: '100%', padding: '0.5rem' }}
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          className='email-input'
         />
       </div>
 
       <div>
         <label>Password:</label>
-        <input 
-          type="password" 
-          value={password} 
-          onChange={(e) => setPassword(e.target.value)} 
-          required 
-          style={{ width: '100%', padding: '0.5rem' }}
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          className='password-input'
         />
       </div>
 
-      <button type="submit" disabled={loading} style={{ padding: '0.5rem', cursor: 'pointer' }}>
+      <button type="submit" disabled={loading} className="submit-button">
         {loading ? 'ログイン中...' : 'ログイン'}
       </button>
     </form>

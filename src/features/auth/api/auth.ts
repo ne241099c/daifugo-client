@@ -36,6 +36,21 @@ export const loginWithEmail = async (email: string, password: string): Promise<U
   return user;
 };
 
+const SIGN_UP_MUTATION = `
+  mutation SignUp($name: String!, $email: String!, $password: String!) {
+    signUp(input: {name: $name, email: $email, password: $password}) {
+      token
+      user { id name }
+    }
+  }
+`;
+
+const DELETE_USER_MUTATION = `
+  mutation DeleteUser {
+    deleteUser
+  }
+`;
+
 export const registerWithEmail = async (name: string, email: string, password: string): Promise<User> => {
   const data = await request<{ signUp: User }>(SIGNUP_MUTATION, { name, email, password });
   return data.signUp;
@@ -44,4 +59,14 @@ export const registerWithEmail = async (name: string, email: string, password: s
 export const logout = () => {
   localStorage.removeItem(STORAGE_KEY_TOKEN);
   window.location.reload(); // 簡易的にリロードして状態リセット
+};
+
+export const signUp = async (name: string, email: string, password: string): Promise<AuthPayload> => {
+  const data = await request<{ signUp: AuthPayload }>(SIGN_UP_MUTATION, { name, email, password });
+  return data.signUp;
+};
+
+export const deleteAccount = async (): Promise<boolean> => {
+  const data = await request<{ deleteUser: boolean }>(DELETE_USER_MUTATION, {});
+  return data.deleteUser;
 };

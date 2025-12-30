@@ -1,0 +1,33 @@
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.login-form h2 {
+    text-align: center;
+}
+
+.error {
+    color: red;
+    text-align: center;
+}
+
+.email-input,
+.password-input {
+    width: 100%;
+    padding: 0.5rem;
+    box-sizing: border-box;
+}
+
+.submit-button {
+    padding: 0.5rem;
+    cursor: pointer;
+    background-color: #1976d2;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+}

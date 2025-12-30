@@ -1,21 +1,22 @@
 // src/features/auth/routes/Login.tsx
-import { useNavigate } from 'react-router-dom'; // コメントアウトを解除
+import { useNavigate } from 'react-router-dom';
 import { LoginForm } from '../components/LoginForm';
+import { Link } from 'react-router-dom';
 
 export const Login = () => {
-  const navigate = useNavigate(); // コメントアウトを解除
+  const navigate = useNavigate();
 
   const handleSuccess = () => {
-    // アラートは邪魔なら消してもOK
-    // alert('ログイン成功！');
-    
     // ロビー画面へ遷移
-    navigate('/'); 
+    navigate('/');
   };
 
   return (
-    <div style={{ padding: '2rem', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+    <div className="container">
       <LoginForm onSuccess={handleSuccess} />
+      <div style={{ marginTop: '1rem' }}>
+        <Link to="/signup">アカウントをお持ちでない方はこちら</Link>
+      </div>
     </div>
   );
 };

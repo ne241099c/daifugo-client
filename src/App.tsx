@@ -1,6 +1,7 @@
 // src/App.tsx
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Login } from './features/auth/routes/Login';
+import { SignUp } from './features/auth/routes/SignUp';
 import { Lobby } from './features/room/routes/Lobby';
 import { GameRoom } from './pages/GameRoom/GameRoom';
 import { STORAGE_KEY_TOKEN } from './lib/graphql';
@@ -18,12 +19,12 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<SignUp />} />
         <Route path="/" element={
           <PrivateRoute>
             <Lobby />
           </PrivateRoute>
         } />
-        {/* ★修正: GameRoomコンポーネントを使用 */}
         <Route path="/room/:roomId" element={
           <PrivateRoute>
             <GameRoom />

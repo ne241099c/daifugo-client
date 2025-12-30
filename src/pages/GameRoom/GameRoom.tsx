@@ -8,6 +8,9 @@ import { GameHeader } from './components/GameHeader';
 import { OpponentArea } from './components/OpponentArea';
 import { TableArea } from './components/TableArea';
 import { HandArea } from './components/HandArea';
+import { deleteAccount } from '../../features/auth/api/auth';
+import { GameResult } from './components/GameResult';
+import { SpectatorArea } from './components/SpectatorArea';
 
 import styles from './GameRoom.module.css';
 
@@ -31,6 +34,7 @@ export const GameRoom = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCardIds, setSelectedCardIds] = useState<number[]>([]);
+  const [showResult, setShowResult] = useState(false);
 
   const [systemMessage, setSystemMessage] = useState<string | null>(null);
 
@@ -62,10 +66,34 @@ export const GameRoom = () => {
   }, [roomId]);
 
   useEffect(() => {
-    fetchRoom();
-    const interval = setInterval(fetchRoom, 2000);
-    return () => clearInterval(interval);
-  }, [fetchRoom]);
+    if (room?.game?.isFinished) {
+      setShowResult(true);
+    } else {
+      setShowResult(false);
+    }
+  }, [room?.game?.isFinished]);
+
+  const handleDeleteAccount = async () => {
+    if (!confirm("本当に退会しますか？この操作は取り消せません。")) return;
+    try {
+      await deleteAccount();
+      localStorage.removeItem(STORAGE_KEY_TOKEN);
+      navigate('/login');
+    } catch (err: any) {
+      alert("退会に失敗しました");
+    }
+  };
+
+  const handleRematch = async () => {
+    if (!roomId) return;
+    try {
+        await startGame(roomId); 
+        setShowResult(false);
+        fetchRoom();
+    } catch(err: any) {
+        alert(err.message);
+    }
+  };
 
   const toggleCardSelection = (cardId: number) => {
     setSelectedCardIds(prev =>
@@ -89,15 +117,12 @@ export const GameRoom = () => {
       setSelectedCardIds([]);
       fetchRoom();
     } catch (err: any) {
-      // ★アラートではなくメッセージ表示
       showMessage('出せません: ' + err.message);
     }
   };
 
   const handlePass = async () => {
     if (!roomId) return;
-    // ★確認ダイアログを削除
-    // if (!confirm("パスしますか？")) return;
     try {
       await pass(roomId);
       fetchRoom();
@@ -124,6 +149,7 @@ export const GameRoom = () => {
   const isGameStarted = !!room.game;
 
   const myPlayer = room.game?.players.find(p => String(p.userID) === myUserId);
+  const isSpectator = isGameStarted && !myPlayer;
   const opponents = room.game?.players.filter(p => String(p.userID) !== myUserId) || [];
   const turnPlayer = room.game?.players[room.game.turn];
 
@@ -132,12 +158,28 @@ export const GameRoom = () => {
   const is11Back = room.game?.fieldCards.some(c => c.rank === 11) ?? false;
   const isEffectiveRevolution = isRevolutionDB !== is11Back;
 
+  if (isSpectator) {
+    return (
+      <div className={styles.container}>
+        <GameHeader room={room} isRevolution={!!room.game?.isRevolution} />
+        <SpectatorArea players={room.game?.players || []} />
+        {showResult && (
+          <GameResult room={room} onRematch={() => {}} isOwner={false} />
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className={styles.container}>
-      {/* ★メッセージ表示エリア */}
+      {/* メッセージ表示エリア */}
       {systemMessage && <div className={styles.systemMessage}>{systemMessage}</div>}
 
       <GameHeader room={room} isRevolution={isEffectiveRevolution} />
+
+      {showResult && (
+        <GameResult room={room} onRematch={handleRematch} isOwner={isOwner} />
+      )}
 
       {!isGameStarted ? (
         <div className={styles.waiting}>
