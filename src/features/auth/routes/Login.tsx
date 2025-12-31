@@ -2,6 +2,7 @@
 import { useNavigate } from 'react-router-dom';
 import { LoginForm } from '../components/LoginForm';
 import { Link } from 'react-router-dom';
+import styles from '../auth.module.css';
 
 export const Login = () => {
   const navigate = useNavigate();
@@ -12,9 +13,10 @@ export const Login = () => {
   };
 
   return (
-    <div className="container">
+    <div className={styles.container}>
+      <h2 className={styles.title}>LOGIN</h2>
       <LoginForm onSuccess={handleSuccess} />
-      <div style={{ marginTop: '1rem' }}>
+      <div className={styles.footer}>
         <Link to="/signup">アカウントをお持ちでない方はこちら</Link>
       </div>
     </div>

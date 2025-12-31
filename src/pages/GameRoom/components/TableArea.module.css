@@ -2,36 +2,59 @@
   width: 100%;
   max-width: 800px;
   min-height: 200px;
-  margin: 20px 0;
-  padding: 20px;
-  background-color: #2e7d32;
-  border: 4px solid #1b5e20;
-  border-radius: 10px;
+  margin: 0;
+  padding: 1rem;
+  
+  /* Modern Dark Table */
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5);
+  
+  border-radius: 24px;
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 10px;
+  gap: 1.5rem; /* Increased spacing */
   box-sizing: border-box;
   position: relative;
+  transition: all 0.3s ease;
 }
 
 .tableAreaActive {
-  background-color: #388e3c;
-  border-style: dashed;
-  border-color: #fff;
+  background: rgba(30, 41, 59, 0.8);
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 30px rgba(251, 191, 36, 0.2);
 }
 
 .noCards {
-  color: rgba(255, 255, 255, 0.7);
-  font-weight: bold;
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 1.1rem;
+  opacity: 0.7;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .dropMessage {
   position: absolute;
-  bottom: 10px;
-  color: white;
-  background: rgba(0,0,0,0.3);
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 0.8rem;
+  bottom: 20px;
+  color: var(--accent-gold);
+  background: rgba(0, 0, 0, 0.6);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  border: 1px solid var(--accent-gold);
+  pointer-events: none;
 }
+@media (max-width: 600px) {
+  .tableArea {
+    flex-direction: column;
+    min-height: 150px;
+  }
+}
+  .tableAreaActive {
+    background: rgba(30, 41, 59, 0.8);
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 30px rgba(251, 191, 36, 0.2);
+  }

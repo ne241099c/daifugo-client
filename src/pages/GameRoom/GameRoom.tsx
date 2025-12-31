@@ -171,6 +171,18 @@ export const GameRoom = () => {
     return (
       <div className={styles.container}>
         <GameHeader room={room} isRevolution={!!room.game?.isRevolution} />
+        
+        <div className={styles.tableSection}>
+          <TableArea
+            cards={room.game?.fieldCards || []}
+            onDropCards={() => {}}
+            isMyTurn={false}
+          />
+          <div className={styles.discardPilePlaceholder}>
+              捨て札<br/>(準備中)
+          </div>
+        </div>
+
         <SpectatorArea players={room.game?.players || []} />
         {showResult && (
           <GameResult 
@@ -223,11 +235,16 @@ export const GameRoom = () => {
             turnUserID={turnPlayer?.userID}
           />
 
-          <TableArea
-            cards={room.game?.fieldCards || []}
-            onDropCards={handleDropCards}
-            isMyTurn={isMyTurn}
-          />
+          <div className={styles.tableSection}>
+              <TableArea
+                cards={room.game?.fieldCards || []}
+                onDropCards={handleDropCards}
+                isMyTurn={isMyTurn}
+              />
+              <div className={styles.discardPilePlaceholder}>
+                  捨て札<br/>(準備中)
+              </div>
+          </div>
 
           <HandArea
             hand={myPlayer?.hand || []}

@@ -21,6 +21,18 @@ export const request = async <T>(query: string, variables?: Record<string, any>)
       body: JSON.stringify({ query, variables }),
     });
 
+    if (response.status === 401) {
+      // トークンを削除
+      localStorage.removeItem(STORAGE_KEY_TOKEN);
+      
+      // ログイン画面へ強制遷移
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
+      
+      throw new Error('Session expired');
+    }
+
     if (!response.ok) {
         throw new Error(`Network response was not ok: ${response.statusText}`);
     }
