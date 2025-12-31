@@ -171,7 +171,7 @@ export const GameRoom = () => {
     return (
       <div className={styles.container}>
         <GameHeader room={room} isRevolution={!!room.game?.isRevolution} />
-        
+
         <div className={styles.tableSection}>
           <TableArea
             cards={room.game?.fieldCards || []}
@@ -207,7 +207,7 @@ export const GameRoom = () => {
         <GameResult 
           room={room} 
           onRematch={handleRematch} 
-          onLeave={handleLeave} // ★追加: 退出処理を渡す
+          onLeave={handleLeave}
           isOwner={isOwner} 
         />
       )}
