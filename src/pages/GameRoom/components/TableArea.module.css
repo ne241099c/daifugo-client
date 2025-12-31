@@ -1,9 +1,9 @@
 .tableArea {
   width: 100%;
   max-width: 800px;
-  min-height: 240px;
+  min-height: 200px;
   margin: 0;
-  padding: 2rem;
+  padding: 1rem;
 
   /* Modern Dark Table */
   background: rgba(15, 23, 42, 0.6);
@@ -15,7 +15,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: -40px; /* Overlap cards slightly */
+  gap: 1.5rem; /* Increased spacing */
   box-sizing: border-box;
   position: relative;
   transition: all 0.3s ease;
