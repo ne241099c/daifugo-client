@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getRoom, startGame, playCard, pass, restartGame } from '../../features/game/api/game';
+import { getRoom, startGame, playCard, pass, restartGame, leaveRoom } from '../../features/game/api/game';
 import type { Room } from '../../types';
 import { STORAGE_KEY_TOKEN } from '../../lib/graphql';
 
@@ -66,6 +66,12 @@ export const GameRoom = () => {
   }, [roomId]);
 
   useEffect(() => {
+    fetchRoom();
+    const interval = setInterval(fetchRoom, 2000);
+    return () => clearInterval(interval);
+  }, [fetchRoom]);
+
+  useEffect(() => {
     if (room?.game?.isFinished) {
       setShowResult(true);
     } else {
@@ -82,6 +88,19 @@ export const GameRoom = () => {
         fetchRoom();
     } catch(err: any) {
         alert(err.message);
+    }
+  };
+
+  const handleLeave = async () => {
+    if (!roomId) return;
+    if (!window.confirm("本当に退出しますか？")) return;
+
+    try {
+      await leaveRoom(roomId);
+      navigate('/'); // ロビー一覧へ戻る
+    } catch (err: any) {
+      alert("退出に失敗しました: " + err.message);
+      navigate('/'); // 失敗してもとりあえずロビーに戻す
     }
   };
 
@@ -154,7 +173,12 @@ export const GameRoom = () => {
         <GameHeader room={room} isRevolution={!!room.game?.isRevolution} />
         <SpectatorArea players={room.game?.players || []} />
         {showResult && (
-          <GameResult room={room} onRematch={() => {}} isOwner={false} />
+          <GameResult 
+            room={room} 
+            onRematch={() => {}} 
+            onLeave={handleLeave} 
+            isOwner={false} 
+          />
         )}
       </div>
     );
@@ -168,7 +192,12 @@ export const GameRoom = () => {
       <GameHeader room={room} isRevolution={isEffectiveRevolution} />
 
       {showResult && (
-        <GameResult room={room} onRematch={handleRematch} isOwner={isOwner} />
+        <GameResult 
+          room={room} 
+          onRematch={handleRematch} 
+          onLeave={handleLeave} // ★追加: 退出処理を渡す
+          isOwner={isOwner} 
+        />
       )}
 
       {!isGameStarted ? (

@@ -28,9 +28,6 @@ export const GameHeader = ({ room, isRevolution }: Props) => {
         <p>ID: {room.id} / 参加者: {room.memberIDs.length}人</p>
       </div>
       <div className={styles.actions}>
-        <button onClick={() => navigate('/')} className={styles.backButton}>
-          ロビーへ戻る
-        </button>
         <button onClick={handleLeave} className={styles.leaveButton}>
           退出する
         </button>
