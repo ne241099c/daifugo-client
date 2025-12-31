@@ -138,19 +138,20 @@
 }
 
 .deleteAccountButton {
-  margin-top: 4rem;
-  color: var(--text-secondary);
-  background: transparent;
-  border: none;
-  font-size: 0.875rem;
-  opacity: 0.5;
-  box-shadow: none;
-}
-.deleteAccountButton:hover {
-  opacity: 1;
+  margin-top: 2rem;
+  padding: 0.5rem 1rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
   color: var(--accent-red);
-  text-decoration: underline;
-  transform: none;
-  background: transparent;
-  box-shadow: none;
+  font-size: 0.875rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.deleteAccountButton:hover {
+  background: var(--accent-red);
+  color: white;
+  border-color: var(--accent-red);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
 }
