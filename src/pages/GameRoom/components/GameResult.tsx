@@ -16,7 +16,7 @@ export const GameResult = ({ room, onRematch, onLeave, isOwner }: Props) => {
         if (index === 0) return styles.rank1;
         if (index === 1) return styles.rank2;
         if (index === 2) return styles.rank3;
-        return '';
+        return styles.rankLower;
     };
 
     return (
