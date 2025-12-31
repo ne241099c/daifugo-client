@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { signUp } from '../api/auth';
 import { STORAGE_KEY_TOKEN } from '../../../lib/graphql';
+import styles from '../auth.module.css';
 
 export const SignUp = () => {
   const navigate = useNavigate();
@@ -22,27 +23,30 @@ export const SignUp = () => {
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '2rem auto', padding: '1rem', textAlign: 'center' }}>
-      <h2>新規登録</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <input 
-          type="text" placeholder="名前" value={name} onChange={(e) => setName(e.target.value)} required 
-          style={{ padding: '0.5rem' }}
-        />
-        <input 
-          type="email" placeholder="メールアドレス" value={email} onChange={(e) => setEmail(e.target.value)} required 
-          style={{ padding: '0.5rem' }}
-        />
-        <input 
-          type="password" placeholder="パスワード" value={password} onChange={(e) => setPassword(e.target.value)} required 
-          style={{ padding: '0.5rem' }}
-        />
-        <button type="submit" style={{ padding: '0.5rem', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px' }}>
+    <div className={styles.container}>
+      <h2 className={styles.title}>SIGN UP</h2>
+      {error && <div className={styles.errorMessage}>{error}</div>}
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <div className={styles.inputGroup}>
+            <input
+            type="text" placeholder="名前" value={name} onChange={(e) => setName(e.target.value)} required
+            />
+        </div>
+        <div className={styles.inputGroup}>
+            <input
+            type="email" placeholder="メールアドレス" value={email} onChange={(e) => setEmail(e.target.value)} required
+            />
+        </div>
+        <div className={styles.inputGroup}>
+            <input
+            type="password" placeholder="パスワード" value={password} onChange={(e) => setPassword(e.target.value)} required
+            />
+        </div>
+        <button type="submit" className={styles.buttonPrimary}>
           登録してログイン
         </button>
       </form>
-      <div style={{ marginTop: '1rem' }}>
+      <div className={styles.footer}>
         <Link to="/login">すでにアカウントをお持ちの方はこちら</Link>
       </div>
     </div>

@@ -17,8 +17,11 @@ export const OpponentArea = ({ players, turnUserID }: Props) => {
             className={`${styles.card} ${isTurn ? styles.active : ''}`}
           >
             <div className={styles.name}>{p.user?.name || 'Unknown'}</div>
-            <div className={styles.info}>手札: {p.hand?.length ?? '?'}枚</div>
-            <div className={styles.info}>順位: {p.rank > 0 ? `${p.rank}位` : '-'}</div>
+            <div className={styles.cardCount}>
+                {p.hand?.length ?? '?'}
+                <span style={{fontSize: '0.8rem', fontWeight: 'normal', color: 'var(--text-secondary)'}}> 枚</span>
+            </div>
+            <div className={styles.info}>Rank: {p.rank > 0 ? `${p.rank}位` : '-'}</div>
           </div>
         );
       })}

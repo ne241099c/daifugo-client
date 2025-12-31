@@ -7,6 +7,7 @@ import { CreateRoomForm } from '../components/CreateRoomForm';
 import { RoomList } from '../components/RoomList';
 import { deleteAccount } from '../../auth/api/auth';
 import { STORAGE_KEY_TOKEN } from '../../../lib/graphql';
+import styles from '../room.module.css';
 
 export const Lobby = () => {
   const navigate = useNavigate();
@@ -67,34 +68,30 @@ export const Lobby = () => {
   };
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h1>大富豪Lobby</h1>
-        <button onClick={logout} style={{ padding: '0.5rem 1rem', cursor: 'pointer' }}>ログアウト</button>
-        <div style={{ marginTop: '50px', borderTop: '1px solid #ccc', paddingTop: '20px', textAlign: 'right' }}>
-          <button
-            onClick={handleDeleteAccount}
-            style={{
-              padding: '0.5rem 1rem',
-              cursor: 'pointer',
-              backgroundColor: '#ff4444',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px'
-            }}
-          >
-            退会
-          </button>
-        </div>
+    <div className={styles.container}>
+      <header className={styles.header}>
+        <h1 className={styles.title}>大富豪 Lobby</h1>
+        <button onClick={logout} className={styles.logoutButton}>LOGOUT</button>
       </header>
 
-      <CreateRoomForm onSubmit={handleCreateRoom} loading={loading} />
+      <div className={styles.createRoomSection}>
+        <CreateRoomForm onSubmit={handleCreateRoom} loading={loading} />
+      </div>
 
       <RoomList
         rooms={rooms}
         onJoin={handleJoinRoom}
         onRefresh={fetchRooms}
       />
+
+      <div style={{textAlign: 'center'}}>
+        <button
+            onClick={handleDeleteAccount}
+            className={styles.deleteAccountButton}
+        >
+            退会する
+        </button>
+      </div>
     </div>
   );
 };

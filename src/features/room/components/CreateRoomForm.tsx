@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import styles from '../room.module.css';
 
 interface CreateRoomFormProps {
   onSubmit: (name: string) => void;
@@ -15,21 +16,21 @@ export const CreateRoomForm = ({ onSubmit, loading }: CreateRoomFormProps) => {
   };
 
   return (
-    <section style={{ marginBottom: '2rem', padding: '1rem', border: '1px solid #ccc', borderRadius: '8px' }}>
-      <h3>新しい部屋を作る</h3>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '0.5rem' }}>
+    <div>
+      <h3 style={{marginBottom: '1rem', color: 'var(--accent-gold)'}}>CREATE ROOM</h3>
+      <form onSubmit={handleSubmit} className={styles.createRoomForm}>
         <input
           type="text"
           placeholder="部屋の名前"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
-          style={{ flex: 1, padding: '0.5rem' }}
+          className={styles.input}
         />
-        <button type="submit" disabled={loading} style={{ padding: '0.5rem 1rem', cursor: 'pointer' }}>
-          {loading ? '作成中...' : '作成して入室'}
+        <button type="submit" disabled={loading} className={styles.createButton}>
+          {loading ? '...' : '作成'}
         </button>
       </form>
-    </section>
+    </div>
   );
 };
