@@ -22,7 +22,7 @@ export const GameResult = ({ room, onRematch, onLeave, isOwner }: Props) => {
     return (
         <div className={styles.overlay}>
             <div className={styles.container}>
-                <h1 className={styles.title}>GAME OVER</h1>
+                <h1 className={styles.title}>順位発表</h1>
 
                 <div className={styles.rankList}>
                     {finishedPlayers.map((p, index) => (
