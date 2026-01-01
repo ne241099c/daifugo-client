@@ -170,7 +170,9 @@ export const GameRoom = () => {
   if (isSpectator) {
     return (
       <div className={styles.container}>
-        <GameHeader room={room} isRevolution={!!room.game?.isRevolution} />
+        <div className={styles.headerArea}>
+            <GameHeader room={room} isRevolution={!!room.game?.isRevolution} />
+        </div>
 
         <div className={styles.tableSection}>
           <TableArea
@@ -183,7 +185,10 @@ export const GameRoom = () => {
           </div>
         </div>
 
-        <SpectatorArea players={room.game?.players || []} />
+        <div className={styles.sidebarArea}>
+            <SpectatorArea players={room.game?.players || []} />
+        </div>
+
         {showResult && (
           <GameResult 
             room={room} 
@@ -201,7 +206,9 @@ export const GameRoom = () => {
       {/* メッセージ表示エリア */}
       {systemMessage && <div className={styles.systemMessage}>{systemMessage}</div>}
 
-      <GameHeader room={room} isRevolution={isEffectiveRevolution} />
+      <div className={styles.headerArea}>
+        <GameHeader room={room} isRevolution={isEffectiveRevolution} />
+      </div>
 
       {showResult && (
         <GameResult 
@@ -230,10 +237,12 @@ export const GameRoom = () => {
         </div>
       ) : (
         <>
-          <OpponentArea
-            players={opponents}
-            turnUserID={turnPlayer?.userID}
-          />
+          <div className={styles.sidebarArea}>
+              <OpponentArea
+                players={opponents}
+                turnUserID={turnPlayer?.userID}
+              />
+          </div>
 
           <div className={styles.tableSection}>
               <TableArea
@@ -246,14 +255,16 @@ export const GameRoom = () => {
               </div>
           </div>
 
-          <HandArea
-            hand={myPlayer?.hand || []}
-            selectedCardIds={selectedCardIds}
-            onToggleSelection={toggleCardSelection}
-            isMyTurn={isMyTurn}
-            onPass={handlePass}
-            turnPlayerName={turnPlayer?.user?.name}
-          />
+          <div className={styles.handArea}>
+              <HandArea
+                hand={myPlayer?.hand || []}
+                selectedCardIds={selectedCardIds}
+                onToggleSelection={toggleCardSelection}
+                isMyTurn={isMyTurn}
+                onPass={handlePass}
+                turnPlayerName={turnPlayer?.user?.name}
+              />
+          </div>
         </>
       )}
     </div>
