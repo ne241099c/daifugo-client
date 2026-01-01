@@ -27,9 +27,11 @@
 }
 
 .active {
-  border-color: var(--accent-gold);
-  background: rgba(251, 191, 36, 0.1); /* Gold tint */
-  box-shadow: 0 0 15px rgba(251, 191, 36, 0.2);
+  border: 2px solid var(--accent-gold);
+  background: rgba(251, 191, 36, 0.25);
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+  transform: scale(1.05);
+  z-index: 10;
 }
 
 .name {
