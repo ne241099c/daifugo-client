@@ -1,8 +1,61 @@
 .container {
+  padding: 1rem;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.title {
+  text-align: center;
+  color: var(--text-primary);
+  background: rgba(0, 0, 0, 0.3);
+  padding: 0.5rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.playerGrid {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.playerCard {
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  padding: 1rem;
+  background: var(--glass-bg);
   width: 100%;
-  padding-bottom: 1rem;
+  max-width: 400px;
+  box-shadow: var(--glass-shadow);
+}
+
+.playerHeader {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-primary);
+}
+
+.rank {
+  color: var(--accent-red);
+  font-weight: bold;
+}
+
+.hand {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-start;
+}
+
+.cardWrapper {
+  /* Default size (60x90) */
+  width: 60px;
+  height: 90px;
 }
