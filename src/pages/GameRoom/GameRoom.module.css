@@ -1,14 +1,21 @@
 .container {
-    padding: 1rem;
+    padding: 0.5rem;
     width: 100%;
-    height: 100vh; /* Fixed height to prevent scroll */
+    height: 100vh;
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    display: grid;
+    grid-template-areas:
+        "header header"
+        "table sidebar"
+        "hand sidebar";
+    grid-template-columns: 1fr 180px;
+    grid-template-rows: auto 1fr auto;
+    align-items: stretch;
+    justify-items: center;
     position: relative;
     box-sizing: border-box;
     background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+    gap: 0.5rem;
 }
 
 .loading,
@@ -105,20 +112,41 @@
     flex: 1;
 }
 
+.headerArea {
+    grid-area: header;
+    width: 100%;
+}
+
+.sidebarArea {
+    grid-area: sidebar;
+    height: 100%;
+    overflow-y: auto;
+    padding-left: 0.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.handArea {
+    grid-area: hand;
+    width: 100%;
+}
+
 .tableSection {
-    flex: 1; /* Occupy remaining space */
+    grid-area: table;
+    width: 100%;
+    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 2rem;
-    width: 100%;
+    gap: 1.5rem;
     min-height: 0;
-    padding: 1rem;
+    padding: 0.5rem;
+    overflow: hidden;
 }
 
 .discardPilePlaceholder {
-    width: 120px;
-    height: 168px; /* Standard card aspect ratio roughly */
+    width: 90px;
+    height: 126px;
     border: 2px dashed rgba(255, 255, 255, 0.1);
     background: rgba(0, 0, 0, 0.2);
     border-radius: 12px;

@@ -1,5 +1,6 @@
 import type { Player } from '../../../types';
 import { Card } from '../../../components/Card/Card';
+import styles from './SpectatorArea.module.css';
 
 interface Props {
   players: Player[];
@@ -7,7 +8,7 @@ interface Props {
 
 export const SpectatorArea = ({ players }: Props) => {
   return (
-    <div style={{ padding: '1rem', overflowY: 'auto' }}>
+    <div className='container'>
       <h2 style={{ textAlign: 'center', color: '#fff', backgroundColor: '#333', padding: '0.5rem' }}>観戦モード</h2>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center' }}>
         {players.map((p) => (
