@@ -6,16 +6,55 @@
     display: grid;
     grid-template-areas:
         "header header"
-        "table sidebar"
-        "hand sidebar";
-    grid-template-columns: 1fr 180px;
-    grid-template-rows: auto 1fr auto;
+        "left right";
+    grid-template-columns: 40% 60%; /* Left narrower for hand? Or equal. 40/60 seems balanced */
+    grid-template-rows: auto 1fr;
     align-items: stretch;
-    justify-items: center;
+    justify-items: stretch;
     position: relative;
     box-sizing: border-box;
     background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
     gap: 0.5rem;
+}
+
+.leftColumn {
+    grid-area: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center hand vertically */
+    height: 100%;
+    overflow: hidden;
+    padding: 1rem;
+    border-right: 1px solid rgba(255,255,255,0.1);
+    background: rgba(0,0,0,0.2);
+    border-radius: 16px;
+}
+
+.rightColumn {
+    grid-area: right;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+    padding: 0.5rem;
+    gap: 1rem;
+}
+
+.systemMessageArea {
+    text-align: center;
+    padding: 1rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--accent-gold);
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.3);
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    border: 1px solid var(--accent-gold);
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .loading,
@@ -117,31 +156,17 @@
     width: 100%;
 }
 
-.sidebarArea {
-    grid-area: sidebar;
-    height: 100%;
-    overflow-y: auto;
-    padding-left: 0.5rem;
-    display: flex;
-    flex-direction: column;
-}
-
-.handArea {
-    grid-area: hand;
-    width: 100%;
-}
-
 .tableSection {
-    grid-area: table;
     width: 100%;
-    height: 100%;
+    flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 1.5rem;
-    min-height: 0;
-    padding: 0.5rem;
-    overflow: hidden;
+    min-height: 200px;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
 }
 
 .discardPilePlaceholder {

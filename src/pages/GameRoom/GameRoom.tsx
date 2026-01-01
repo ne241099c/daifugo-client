@@ -174,19 +174,21 @@ export const GameRoom = () => {
             <GameHeader room={room} isRevolution={!!room.game?.isRevolution} />
         </div>
 
-        <div className={styles.tableSection}>
-          <TableArea
-            cards={room.game?.fieldCards || []}
-            onDropCards={() => {}}
-            isMyTurn={false}
-          />
-          <div className={styles.discardPilePlaceholder}>
-              捨て札<br/>(準備中)
-          </div>
+        <div className={styles.leftColumn}>
+            <SpectatorArea players={room.game?.players || []} />
         </div>
 
-        <div className={styles.sidebarArea}>
-            <SpectatorArea players={room.game?.players || []} />
+        <div className={styles.rightColumn}>
+             <div className={styles.tableSection}>
+                <TableArea
+                    cards={room.game?.fieldCards || []}
+                    onDropCards={() => {}}
+                    isMyTurn={false}
+                />
+                <div className={styles.discardPilePlaceholder}>
+                    捨て札<br/>(準備中)
+                </div>
+            </div>
         </div>
 
         {showResult && (
@@ -203,9 +205,6 @@ export const GameRoom = () => {
 
   return (
     <div className={styles.container}>
-      {/* メッセージ表示エリア */}
-      {systemMessage && <div className={styles.systemMessage}>{systemMessage}</div>}
-
       <div className={styles.headerArea}>
         <GameHeader room={room} isRevolution={isEffectiveRevolution} />
       </div>
@@ -237,26 +236,9 @@ export const GameRoom = () => {
         </div>
       ) : (
         <>
-          <div className={styles.sidebarArea}>
-              <OpponentArea
-                players={opponents}
-                turnUserID={turnPlayer?.userID}
-              />
-          </div>
-
-          <div className={styles.tableSection}>
-              <TableArea
-                cards={room.game?.fieldCards || []}
-                onDropCards={handleDropCards}
-                isMyTurn={isMyTurn}
-              />
-              <div className={styles.discardPilePlaceholder}>
-                  捨て札<br/>(準備中)
-              </div>
-          </div>
-
-          <div className={styles.handArea}>
-              <HandArea
+          <div className={styles.leftColumn}>
+             {systemMessage && <div className={styles.systemMessageArea}>{systemMessage}</div>}
+             <HandArea
                 hand={myPlayer?.hand || []}
                 selectedCardIds={selectedCardIds}
                 onToggleSelection={toggleCardSelection}
@@ -264,6 +246,23 @@ export const GameRoom = () => {
                 onPass={handlePass}
                 turnPlayerName={turnPlayer?.user?.name}
               />
+          </div>
+
+          <div className={styles.rightColumn}>
+              <OpponentArea
+                players={opponents}
+                turnUserID={turnPlayer?.userID}
+              />
+              <div className={styles.tableSection}>
+                  <TableArea
+                    cards={room.game?.fieldCards || []}
+                    onDropCards={handleDropCards}
+                    isMyTurn={isMyTurn}
+                  />
+                  <div className={styles.discardPilePlaceholder}>
+                      捨て札<br/>(準備中)
+                  </div>
+              </div>
           </div>
         </>
       )}
