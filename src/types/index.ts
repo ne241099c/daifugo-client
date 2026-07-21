@@ -15,6 +15,7 @@ export interface Player {
   userID: string;
   user: User;
   hand: Card[];
+  handCount: number;
   rank: number;
 }
 
