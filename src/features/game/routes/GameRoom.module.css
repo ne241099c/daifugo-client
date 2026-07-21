@@ -32,10 +32,12 @@
     grid-area: right;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    /* Center hand vertically */
+    justify-content: flex-start;
+    /* 縦スクロール可能にする。パス表示は sticky で上部に残す */
     height: 100%;
-    overflow: hidden;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
     padding: 2rem;
     border-right: 1px solid rgba(255, 255, 255, 0.1);
     background: rgba(0, 0, 0, 0.2);
@@ -43,6 +45,11 @@
 }
 
 .systemMessageArea {
+    /* スクロールしても上部に残す */
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    flex-shrink: 0;
     text-align: center;
     padding: 1rem;
     font-size: 1.5rem;
@@ -52,11 +59,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(15, 23, 42, 0.95);
     border-radius: 12px;
     margin-bottom: 2rem;
     border: 1px solid var(--accent-gold);
-    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    animation: fadeIn 0.3s ease-out;
 }
 
 .loading,
@@ -76,8 +84,12 @@
 }
 
 .waiting {
+    /* グリッドの左右両カラムをまたいで中央に配置する */
+    grid-column: 1 / -1;
+    grid-row: 2;
+    align-self: center;
+    justify-self: center;
     text-align: center;
-    margin-top: 10vh;
     background: var(--glass-bg);
     padding: 3rem;
     border-radius: 24px;
@@ -149,6 +161,18 @@
     to {
         opacity: 1;
         transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
