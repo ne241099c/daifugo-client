@@ -27,6 +27,14 @@ const GET_ROOM_QUERY = `
             suit
             rank
           }
+          handCount
+          rank
+          user {
+            name
+          }
+        }
+        finishedPlayers {
+          userID
           rank
           user {
             name
