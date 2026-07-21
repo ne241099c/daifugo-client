@@ -37,6 +37,7 @@ export interface Room {
   name: string;
   ownerID: string;
   memberIDs: string[];
+  botIDs?: string[];
   owner: User;
   members: User[];
   game?: Game;

@@ -11,6 +11,11 @@ const GET_ROOM_QUERY = `
       name
       ownerID
       memberIDs
+      botIDs
+      members {
+        id
+        name
+      }
       game {
         turn
         isRevolution
@@ -60,6 +65,14 @@ const START_GAME_MUTATION = `
   }
 `;
 
+const ADD_BOT_MUTATION = `
+  mutation AddBot($roomID: ID!) {
+    addBot(roomID: $roomID) {
+      id
+    }
+  }
+`;
+
 const PLAY_CARD_MUTATION = `
   mutation PlayCard($roomID: ID!, $cardIDs: [Int!]!) {
     playCard(roomID: $roomID, cardIDs: $cardIDs) {
@@ -96,6 +109,11 @@ export const getRoom = async (id: string): Promise<Room> => {
 export const startGame = async (roomID: string): Promise<Room> => {
   const data = await request<{ startGame: Room }>(START_GAME_MUTATION, { roomID });
   return data.startGame;
+};
+
+export const addBot = async (roomID: string): Promise<Room> => {
+  const data = await request<{ addBot: Room }>(ADD_BOT_MUTATION, { roomID });
+  return data.addBot;
 };
 
 export const playCard = async (roomID: string, cardIDs: number[]): Promise<Room> => {

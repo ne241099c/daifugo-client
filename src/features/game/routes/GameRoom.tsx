@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
-import { getRoom, startGame, playCard, pass, restartGame, leaveRoom } from '../api/game';
+import { getRoom, startGame, addBot, playCard, pass, restartGame, leaveRoom } from '../api/game';
 import type { Room } from '../../../types';
 import { getMyUserId } from '../../../lib/auth';
 import { getErrorMessage } from '../../../lib/errors';
@@ -127,6 +127,12 @@ export const GameRoom = () => {
     catch (err) { showMessage('開始エラー: ' + getErrorMessage(err)); }
   };
 
+  const handleAddBot = async () => {
+    if (!roomId) return;
+    try { await addBot(roomId); fetchRoom(); }
+    catch (err) { showMessage('CPU追加エラー: ' + getErrorMessage(err)); }
+  };
+
   const handleDropCards = async () => {
     if (!roomId || selectedCardIds.length === 0) {
       showMessage("カードを選択してからドロップしてください");
@@ -235,18 +241,40 @@ export const GameRoom = () => {
       {!isGameStarted ? (
         <div className={styles.waiting}>
           <h2>待機中... ({room.memberIDs.length}人参加中)</h2>
+
+          {room.members && room.members.length > 0 && (
+            <ul className={styles.memberList}>
+              {room.members.map((m) => (
+                <li key={m.id} className={styles.memberItem}>
+                  <span>{m.name}</span>
+                  {room.botIDs?.includes(m.id) && <span className={styles.botBadge}>CPU</span>}
+                </li>
+              ))}
+            </ul>
+          )}
+
           {isOwner ? (
-            <button
-              onClick={handleStartGame}
-              disabled={room.memberIDs.length < 2}
-              className={styles.startButton}
-            >
-              ゲーム開始
-            </button>
+            <div className={styles.waitingActions}>
+              <button
+                onClick={handleAddBot}
+                disabled={room.memberIDs.length >= 4}
+                className={styles.addBotButton}
+              >
+                ＋ CPUを追加
+              </button>
+              <button
+                onClick={handleStartGame}
+                disabled={room.memberIDs.length < 2}
+                className={styles.startButton}
+              >
+                ゲーム開始
+              </button>
+            </div>
           ) : (
             <p>ホストが開始するのを待っています...</p>
           )}
-          {room.memberIDs.length < 2 && <p className={styles.warning}>開始するには2人以上必要です</p>}
+          {room.memberIDs.length < 2 && <p className={styles.warning}>開始するには2人以上必要です（CPUを追加できます）</p>}
+          {room.memberIDs.length >= 4 && <p className={styles.warning}>満員です（最大4人）</p>}
         </div>
       ) : (
         <>
