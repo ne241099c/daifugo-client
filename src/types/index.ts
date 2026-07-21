@@ -28,6 +28,7 @@ export interface Player {
 export interface Game {
   turn: number;
   fieldCards: Card[];
+  discardPile: Card[];
   isRevolution: boolean;
   players: Player[];
   finishedPlayers?: Player[];

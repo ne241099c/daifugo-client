@@ -8,6 +8,7 @@ import { getErrorMessage } from '../../../lib/errors';
 import { GameHeader } from '../components/GameHeader';
 import { OpponentArea } from '../components/OpponentArea';
 import { TableArea } from '../components/TableArea';
+import { DiscardPile } from '../components/DiscardPile';
 import { HandArea } from '../components/HandArea';
 import { GameResult } from '../components/GameResult';
 import { SpectatorArea } from '../components/SpectatorArea';
@@ -168,9 +169,7 @@ export const GameRoom = () => {
               onDropCards={() => { }}
               isMyTurn={false}
             />
-            <div className={styles.discardPilePlaceholder}>
-              捨て札<br />(準備中)
-            </div>
+            <DiscardPile cards={room.game?.discardPile || []} />
           </div>
         </div>
 
@@ -246,9 +245,7 @@ export const GameRoom = () => {
                 onDropCards={handleDropCards}
                 isMyTurn={isMyTurn}
               />
-              <div className={styles.discardPilePlaceholder}>
-                捨て札<br />(準備中)
-              </div>
+              <DiscardPile cards={room.game?.discardPile || []} />
             </div>
           </div>
         </>
