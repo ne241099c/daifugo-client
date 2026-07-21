@@ -29,18 +29,28 @@
   letter-spacing: -0.05em;
 }
 
-.logoutButton {
+.playerNameButton {
   padding: 0.5rem 1.25rem;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: var(--accent-red);
-  font-size: 0.875rem;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.logoutButton:hover {
-  background: var(--accent-red);
-  color: white;
-  border-color: var(--accent-red);
+.playerNameButton:hover {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+}
+
+.editHint {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+  margin-left: 0.5rem;
 }
 
 .createRoomSection {

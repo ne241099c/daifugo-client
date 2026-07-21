@@ -1,34 +1,33 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import type { ReactNode } from 'react';
-import { Login } from './features/auth/routes/Login';
-import { SignUp } from './features/auth/routes/SignUp';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { Lobby } from './features/room/routes/Lobby';
 import { GameRoom } from './features/game/routes/GameRoom';
-import { isAuthenticated } from './lib/auth';
-
-const PrivateRoute = ({ children }: { children: ReactNode }) => {
-  if (!isAuthenticated()) {
-    return <Navigate to="/login" />;
-  }
-  return <>{children}</>;
-};
+import { ensureGuest } from './features/user/api/user';
 
 function App() {
+  // ログインの代わりに、起動時に一度だけゲストを用意する。
+  const [ready, setReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    ensureGuest()
+      .then(() => setReady(true))
+      .catch(() => setError('サーバーに接続できませんでした。サーバーが起動しているか確認してください。'));
+  }, []);
+
+  if (error) {
+    return <div className="app-boot-message">{error}</div>;
+  }
+
+  if (!ready) {
+    return <div className="app-boot-message">接続中...</div>;
+  }
+
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/" element={
-          <PrivateRoute>
-            <Lobby />
-          </PrivateRoute>
-        } />
-        <Route path="/room/:roomId" element={
-          <PrivateRoute>
-            <GameRoom />
-          </PrivateRoute>
-        } />
+        <Route path="/" element={<Lobby />} />
+        <Route path="/room/:roomId" element={<GameRoom />} />
       </Routes>
     </BrowserRouter>
   );

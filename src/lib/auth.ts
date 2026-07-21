@@ -1,26 +1,30 @@
-export const STORAGE_KEY_TOKEN = 'daifugo_token';
+// ログインを廃止し、匿名ゲストとして遊ぶための識別情報を localStorage に保持する。
+// サーバーへは X-User-ID ヘッダーでこの id を送る（[[graphql]] 参照）。
 
-export const getToken = (): string | null => localStorage.getItem(STORAGE_KEY_TOKEN);
+const STORAGE_KEY_GUEST = 'daifugo_guest';
 
-export const setToken = (token: string): void => localStorage.setItem(STORAGE_KEY_TOKEN, token);
+export interface Guest {
+  id: string;
+  name: string;
+}
 
-export const clearToken = (): void => localStorage.removeItem(STORAGE_KEY_TOKEN);
-
-export const isAuthenticated = (): boolean => !!getToken();
-
-/**
- * JWT のペイロード（`sub` クレーム）からログイン中ユーザーのIDを取り出す。
- * トークンが無い/不正な場合は null を返す。
- */
-export const getMyUserId = (): string | null => {
-  const token = getToken();
-  if (!token) return null;
+export const getGuest = (): Guest | null => {
+  const raw = localStorage.getItem(STORAGE_KEY_GUEST);
+  if (!raw) return null;
   try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const payload = JSON.parse(window.atob(base64)) as { sub?: string };
-    return payload.sub ?? null;
+    const parsed = JSON.parse(raw) as Guest;
+    if (!parsed?.id) return null;
+    return parsed;
   } catch {
     return null;
   }
 };
+
+export const setGuest = (guest: Guest): void => {
+  localStorage.setItem(STORAGE_KEY_GUEST, JSON.stringify(guest));
+};
+
+/** サーバーへ送るゲストのユーザーID。未登録なら null。 */
+export const getMyUserId = (): string | null => getGuest()?.id ?? null;
+
+export const getGuestName = (): string | null => getGuest()?.name ?? null;

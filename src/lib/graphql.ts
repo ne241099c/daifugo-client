@@ -1,5 +1,5 @@
 import { API_URL } from './config';
-import { clearToken, getToken } from './auth';
+import { getMyUserId } from './auth';
 
 interface GraphQLError {
   message: string;
@@ -16,10 +16,10 @@ export const request = async <T>(query: string, variables?: Record<string, unkno
     Accept: 'application/json',
   };
 
-  // ローカルストレージからトークンを自動取得
-  const token = getToken();
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
+  // ログインの代わりに、保持しているゲストIDを識別子として送る
+  const userId = getMyUserId();
+  if (userId) {
+    headers['X-User-ID'] = userId;
   }
 
   try {
@@ -28,15 +28,6 @@ export const request = async <T>(query: string, variables?: Record<string, unkno
       headers,
       body: JSON.stringify({ query, variables }),
     });
-
-    if (response.status === 401) {
-      // トークンを削除してログイン画面へ強制遷移
-      clearToken();
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login';
-      }
-      throw new Error('Session expired');
-    }
 
     if (!response.ok) {
       throw new Error(`Network response was not ok: ${response.statusText}`);

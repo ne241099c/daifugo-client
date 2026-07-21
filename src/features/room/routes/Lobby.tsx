@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createRoom, getRooms, joinRoom } from '../api/room';
 import type { Room } from '../../../types';
-import { deleteAccount, logout } from '../../auth/api/auth';
-import { clearToken } from '../../../lib/auth';
+import { getGuestName } from '../../../lib/auth';
+import { renameUser } from '../../../features/user/api/user';
 import { getErrorMessage } from '../../../lib/errors';
 import { CreateRoomForm } from '../components/CreateRoomForm';
 import { RoomList } from '../components/RoomList';
@@ -13,18 +13,33 @@ export const Lobby = () => {
   const navigate = useNavigate();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(false);
+  const [name, setName] = useState(getGuestName() ?? '');
 
-  useEffect(() => {
-    fetchRooms();
-  }, []);
-
-  const fetchRooms = async () => {
+  const fetchRooms = useCallback(async () => {
     try {
       const data = await getRooms();
       setRooms(data);
     } catch (error) {
       console.error('部屋一覧取得エラー:', error);
       alert('部屋一覧の取得に失敗しました');
+    }
+  }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 非同期フェッチの完了後に更新するため同期的なカスケードは発生しない
+    fetchRooms();
+  }, [fetchRooms]);
+
+  const handleRename = async () => {
+    const next = window.prompt('プレイヤー名を入力', name);
+    if (next === null) return;
+    const trimmed = next.trim();
+    if (!trimmed || trimmed === name) return;
+    try {
+      const guest = await renameUser(trimmed);
+      setName(guest.name);
+    } catch (err) {
+      alert('名前の変更に失敗しました: ' + getErrorMessage(err));
     }
   };
 
@@ -56,22 +71,13 @@ export const Lobby = () => {
     }
   };
 
-  const handleDeleteAccount = async () => {
-    if (!window.confirm("本当に退会しますか？\nこの操作は取り消せません。")) return;
-    try {
-      await deleteAccount();
-      clearToken();
-      navigate('/login');
-    } catch (err) {
-      alert('退会に失敗しました: ' + getErrorMessage(err));
-    }
-  };
-
   return (
     <div className={styles.container}>
       <header className={styles.header}>
         <h1 className={styles.title}>大富豪 Lobby</h1>
-        <button onClick={logout} className={styles.logoutButton}>LOGOUT</button>
+        <button onClick={handleRename} className={styles.playerNameButton}>
+          {name || 'ゲスト'} <span className={styles.editHint}>✎ 名前変更</span>
+        </button>
       </header>
 
       <div className={styles.createRoomSection}>
@@ -83,15 +89,6 @@ export const Lobby = () => {
         onJoin={handleJoinRoom}
         onRefresh={fetchRooms}
       />
-      
-      <div className={styles.deleteAccountSection}>
-        <button
-            onClick={handleDeleteAccount}
-            className={styles.deleteAccountButton}
-        >
-            退会する
-        </button>
-      </div>
     </div>
   );
 };

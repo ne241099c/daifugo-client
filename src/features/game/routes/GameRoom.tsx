@@ -21,8 +21,6 @@ export const GameRoom = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCardIds, setSelectedCardIds] = useState<number[]>([]);
-  const [showResult, setShowResult] = useState(false);
-
   const [systemMessage, setSystemMessage] = useState<string | null>(null);
 
   const myUserId = getMyUserId();
@@ -52,26 +50,18 @@ export const GameRoom = () => {
     }
   }, [roomId]);
 
+  // 2秒ごとに部屋の状態をポーリングする（外部システムとの同期）。
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 非同期フェッチの完了後に更新するため同期的なカスケードは発生しない
     fetchRoom();
     const interval = setInterval(fetchRoom, 2000);
     return () => clearInterval(interval);
   }, [fetchRoom]);
 
-  useEffect(() => {
-    if (room?.game?.isFinished) {
-      setShowResult(true);
-    } else {
-      setShowResult(false);
-    }
-  }, [room?.game?.isFinished]);
-
-
   const handleRematch = async () => {
     if (!roomId) return;
     try {
       await restartGame(roomId);
-      setShowResult(false);
       fetchRoom();
     } catch (err) {
       alert(getErrorMessage(err));
@@ -141,6 +131,7 @@ export const GameRoom = () => {
 
   if (!room) return <div className={styles.loading}>部屋データがありません</div>;
 
+  const showResult = !!room.game?.isFinished;
   const isOwner = myUserId === String(room.ownerID);
   const isGameStarted = !!room.game;
 
