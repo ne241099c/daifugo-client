@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { getRoom, startGame, addBot, playCard, pass, restartGame, leaveRoom } from '../api/game';
-import type { Room } from '../../../types';
+import type { Card, Room } from '../../../types';
 import { getMyUserId } from '../../../lib/auth';
 import { getErrorMessage } from '../../../lib/errors';
 import { subscribeRoomEvents } from '../../../lib/sse';
@@ -18,6 +18,23 @@ import { CutIn, type CutInType } from '../components/CutIn';
 
 import styles from './GameRoom.module.css';
 
+const CUT_IN_DURATION_MS = 1800;
+const CUT_IN_EVENTS = ['eight_cut', 'revolution', 'eleven_back'] as const satisfies readonly CutInType[];
+
+const isCutInType = (event: string | undefined): event is CutInType =>
+  CUT_IN_EVENTS.includes(event as CutInType);
+
+const getCutInTypeForPlayedCards = (cards: Card[]): CutInType | null => {
+  if (cards.length === 0) return null;
+
+  const isRevolution = cards.length >= 4 && cards.every((card) => card.rank === cards[0].rank);
+  if (isRevolution) return 'revolution';
+  if (cards.some((card) => card.rank === 8)) return 'eight_cut';
+  if (cards.some((card) => card.rank === 11)) return 'eleven_back';
+
+  return null;
+};
+
 export const GameRoom = () => {
   const { roomId } = useParams<{ roomId: string }>();
   const navigate = useNavigate();
@@ -29,7 +46,9 @@ export const GameRoom = () => {
 
   // カットイン演出（8切り・革命）
   const [cutIn, setCutIn] = useState<CutInType | null>(null);
+  const cutInTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSeenEventSeq = useRef<number | null>(null);
+  const recentLocalCutIn = useRef<{ type: CutInType; shownAt: number } | null>(null);
 
   const myUserId = getMyUserId();
 
@@ -38,6 +57,27 @@ export const GameRoom = () => {
     setSystemMessage(msg);
     setTimeout(() => setSystemMessage(null), 3000);
   };
+
+  const showCutIn = useCallback((type: CutInType, source: 'local' | 'server' = 'server') => {
+    if (source === 'local') {
+      recentLocalCutIn.current = { type, shownAt: Date.now() };
+    }
+
+    if (cutInTimer.current) {
+      clearTimeout(cutInTimer.current);
+    }
+
+    setCutIn(type);
+    cutInTimer.current = setTimeout(() => setCutIn(null), CUT_IN_DURATION_MS);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (cutInTimer.current) {
+        clearTimeout(cutInTimer.current);
+      }
+    };
+  }, []);
 
   const fetchRoom = useCallback(async () => {
     if (!roomId) {
@@ -85,12 +125,16 @@ export const GameRoom = () => {
     if (seq <= lastSeenEventSeq.current) return;
     lastSeenEventSeq.current = seq;
 
-    if (ev === 'eight_cut' || ev === 'revolution' || ev === 'eleven_back') {
-      setCutIn(ev);
-      const timer = setTimeout(() => setCutIn(null), 1800);
-      return () => clearTimeout(timer);
+    if (isCutInType(ev)) {
+      const local = recentLocalCutIn.current;
+      const justShownLocally =
+        local?.type === ev && Date.now() - local.shownAt < CUT_IN_DURATION_MS + 500;
+
+      if (!justShownLocally) {
+        showCutIn(ev);
+      }
     }
-  }, [room?.game?.eventSeq, room?.game?.lastEvent]);
+  }, [room?.game?.eventSeq, room?.game?.lastEvent, showCutIn]);
 
   const handleRematch = async () => {
     if (!roomId) return;
@@ -139,7 +183,13 @@ export const GameRoom = () => {
       return;
     }
     try {
+      const selectedCards = myPlayer?.hand.filter((card) => selectedCardIds.includes(card.id)) ?? [];
+      const localCutIn = getCutInTypeForPlayedCards(selectedCards);
+
       await playCard(roomId, selectedCardIds);
+      if (localCutIn) {
+        showCutIn(localCutIn, 'local');
+      }
       setSelectedCardIds([]);
       fetchRoom();
     } catch (err) {
