@@ -54,3 +54,9 @@
     color: var(--accent-blue);
     margin: 0.25rem 0;
 }
+
+.cardCountUnit {
+    font-size: 0.8rem;
+    font-weight: normal;
+    color: var(--text-secondary);
+}

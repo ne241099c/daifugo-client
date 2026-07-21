@@ -1,8 +1,7 @@
-// src/features/auth/api/auth.ts
-import { request, STORAGE_KEY_TOKEN } from '../../../lib/graphql';
-import type { AuthPayload, User } from '../../../types';
+import { request } from '../../../lib/graphql';
+import { clearToken, setToken } from '../../../lib/auth';
+import type { AuthPayload } from '../../../types';
 
-// GraphQLクエリ定義
 const LOGIN_MUTATION = `
   mutation Login($email: String!, $password: String!) {
     login(email: $email, password: $password) {
@@ -15,16 +14,6 @@ const LOGIN_MUTATION = `
     }
   }
 `;
-
-export const loginWithEmail = async (email: string, password: string): Promise<User> => {
-  const data = await request<{ login: AuthPayload }>(LOGIN_MUTATION, { email, password });
-  const { token, user } = data.login;
-  
-  // トークンを保存
-  localStorage.setItem(STORAGE_KEY_TOKEN, token);
-  
-  return user;
-};
 
 const SIGN_UP_MUTATION = `
   mutation SignUp($name: String!, $email: String!, $password: String!) {
@@ -41,23 +30,25 @@ const DELETE_USER_MUTATION = `
   }
 `;
 
+/** ログインし、取得したトークンを保存する。 */
 export const login = async (email: string, password: string): Promise<AuthPayload> => {
   const data = await request<{ login: AuthPayload }>(LOGIN_MUTATION, { email, password });
+  setToken(data.login.token);
   return data.login;
 };
 
-export const logout = () => {
-  localStorage.removeItem(STORAGE_KEY_TOKEN);
+/** 登録後、そのままログインしてトークンを保存する。 */
+export const signUp = async (name: string, email: string, password: string): Promise<AuthPayload> => {
+  await request<{ signUp: { id: string; name: string } }>(SIGN_UP_MUTATION, { name, email, password });
+  return login(email, password);
+};
+
+export const logout = (): void => {
+  clearToken();
   window.location.reload(); // 簡易的にリロードして状態リセット
 };
 
-export const signUp = async (name: string, email: string, password: string): Promise<AuthPayload> => {
-  await request<{ signUp: { id: string, name: string } }>(SIGN_UP_MUTATION, { name, email, password });
-  
-  return await login(email, password);
-};
-
 export const deleteAccount = async (): Promise<boolean> => {
-  const data = await request<{ deleteUser: boolean }>(DELETE_USER_MUTATION, {});
+  const data = await request<{ deleteUser: boolean }>(DELETE_USER_MUTATION);
   return data.deleteUser;
 };

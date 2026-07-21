@@ -1,17 +1,25 @@
-import { API_URL } from '../config/index';
+import { API_URL } from './config';
+import { clearToken, getToken } from './auth';
 
-export const STORAGE_KEY_TOKEN = 'daifugo_token';
+interface GraphQLError {
+  message: string;
+}
 
-export const request = async <T>(query: string, variables?: Record<string, any>): Promise<T> => {
+interface GraphQLResponse<T> {
+  data: T;
+  errors?: GraphQLError[];
+}
+
+export const request = async <T>(query: string, variables?: Record<string, unknown>): Promise<T> => {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
+    Accept: 'application/json',
   };
 
   // ローカルストレージからトークンを自動取得
-  const token = localStorage.getItem(STORAGE_KEY_TOKEN);
+  const token = getToken();
   if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+    headers.Authorization = `Bearer ${token}`;
   }
 
   try {
@@ -22,27 +30,22 @@ export const request = async <T>(query: string, variables?: Record<string, any>)
     });
 
     if (response.status === 401) {
-      // トークンを削除
-      localStorage.removeItem(STORAGE_KEY_TOKEN);
-      
-      // ログイン画面へ強制遷移
+      // トークンを削除してログイン画面へ強制遷移
+      clearToken();
       if (window.location.pathname !== '/login') {
         window.location.href = '/login';
       }
-      
       throw new Error('Session expired');
     }
 
     if (!response.ok) {
-        throw new Error(`Network response was not ok: ${response.statusText}`);
+      throw new Error(`Network response was not ok: ${response.statusText}`);
     }
 
-    const json = await response.json();
+    const json = (await response.json()) as GraphQLResponse<T>;
 
-    if (json.errors) {
-      // GraphQLのエラー処理
-      const message = json.errors.map((e: any) => e.message).join(', ');
-      throw new Error(message);
+    if (json.errors?.length) {
+      throw new Error(json.errors.map((e) => e.message).join(', '));
     }
 
     return json.data;

@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createRoom, getRooms, joinRoom } from '../api/room';
 import type { Room } from '../../../types';
-import { logout } from '../../auth/api/auth';
+import { deleteAccount, logout } from '../../auth/api/auth';
+import { clearToken } from '../../../lib/auth';
+import { getErrorMessage } from '../../../lib/errors';
 import { CreateRoomForm } from '../components/CreateRoomForm';
 import { RoomList } from '../components/RoomList';
-import { deleteAccount } from '../../auth/api/auth';
-import { STORAGE_KEY_TOKEN } from '../../../lib/graphql';
 import styles from '../room.module.css';
 
 export const Lobby = () => {
@@ -50,9 +50,9 @@ export const Lobby = () => {
       const room = await joinRoom(roomID);
       console.log('参加成功:', room);
       navigate(`/room/${room.id}`);
-    } catch (error: any) {
+    } catch (error) {
       console.error('部屋参加エラー詳細:', error);
-      alert(`部屋への参加に失敗しました: ${error.message || '不明なエラー'}`);
+      alert(`部屋への参加に失敗しました: ${getErrorMessage(error)}`);
     }
   };
 
@@ -60,10 +60,10 @@ export const Lobby = () => {
     if (!window.confirm("本当に退会しますか？\nこの操作は取り消せません。")) return;
     try {
       await deleteAccount();
-      localStorage.removeItem(STORAGE_KEY_TOKEN);
+      clearToken();
       navigate('/login');
-    } catch (err: any) {
-      alert("退会に失敗しました: " + (err.message || "不明なエラー"));
+    } catch (err) {
+      alert('退会に失敗しました: ' + getErrorMessage(err));
     }
   };
 
@@ -84,7 +84,7 @@ export const Lobby = () => {
         onRefresh={fetchRooms}
       />
       
-      <div style={{textAlign: 'center'}}>
+      <div className={styles.deleteAccountSection}>
         <button
             onClick={handleDeleteAccount}
             className={styles.deleteAccountButton}

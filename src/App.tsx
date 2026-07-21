@@ -1,14 +1,13 @@
-// src/App.tsx
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import type { ReactNode } from 'react';
 import { Login } from './features/auth/routes/Login';
 import { SignUp } from './features/auth/routes/SignUp';
 import { Lobby } from './features/room/routes/Lobby';
-import { GameRoom } from './pages/GameRoom/GameRoom';
-import { STORAGE_KEY_TOKEN } from './lib/graphql';
+import { GameRoom } from './features/game/routes/GameRoom';
+import { isAuthenticated } from './lib/auth';
 
-const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
-  const token = localStorage.getItem(STORAGE_KEY_TOKEN);
-  if (!token) {
+const PrivateRoute = ({ children }: { children: ReactNode }) => {
+  if (!isAuthenticated()) {
     return <Navigate to="/login" />;
   }
   return <>{children}</>;

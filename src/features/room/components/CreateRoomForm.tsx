@@ -17,7 +17,7 @@ export const CreateRoomForm = ({ onSubmit, loading }: CreateRoomFormProps) => {
 
   return (
     <div>
-      <h3 style={{marginBottom: '1rem', color: 'var(--accent-gold)'}}>CREATE ROOM</h3>
+      <h3 className={styles.sectionTitle}>CREATE ROOM</h3>
       <form onSubmit={handleSubmit} className={styles.createRoomForm}>
         <input
           type="text"

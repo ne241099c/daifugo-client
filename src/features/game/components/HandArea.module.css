@@ -81,3 +81,7 @@
     min-height: 120px;
     perspective: 1000px; /* For potential 3D effects */
 }
+
+.cardWrapper {
+    display: inline-block;
+}

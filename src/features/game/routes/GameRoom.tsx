@@ -1,31 +1,18 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getRoom, startGame, playCard, pass, restartGame, leaveRoom } from '../../features/game/api/game';
-import type { Room } from '../../types';
-import { STORAGE_KEY_TOKEN } from '../../lib/graphql';
+import { getRoom, startGame, playCard, pass, restartGame, leaveRoom } from '../api/game';
+import type { Room } from '../../../types';
+import { getMyUserId } from '../../../lib/auth';
+import { getErrorMessage } from '../../../lib/errors';
 
-import { GameHeader } from './components/GameHeader';
-import { OpponentArea } from './components/OpponentArea';
-import { TableArea } from './components/TableArea';
-import { HandArea } from './components/HandArea';
-import { GameResult } from './components/GameResult';
-import { SpectatorArea } from './components/SpectatorArea';
-
+import { GameHeader } from '../components/GameHeader';
+import { OpponentArea } from '../components/OpponentArea';
+import { TableArea } from '../components/TableArea';
+import { HandArea } from '../components/HandArea';
+import { GameResult } from '../components/GameResult';
+import { SpectatorArea } from '../components/SpectatorArea';
 
 import styles from './GameRoom.module.css';
-
-const getMyUserId = () => {
-  const token = localStorage.getItem(STORAGE_KEY_TOKEN);
-  if (!token) return null;
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const payload = JSON.parse(window.atob(base64));
-    return payload.sub;
-  } catch (e) {
-    return null;
-  }
-};
 
 export const GameRoom = () => {
   const { roomId } = useParams<{ roomId: string }>();
@@ -57,9 +44,9 @@ export const GameRoom = () => {
       const data = await getRoom(roomId);
       setRoom(data);
       setError(null);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
-      setError(err.message || "情報の取得に失敗しました");
+      setError(getErrorMessage(err, '情報の取得に失敗しました'));
     } finally {
       setLoading(false);
     }
@@ -86,8 +73,8 @@ export const GameRoom = () => {
       await restartGame(roomId);
       setShowResult(false);
       fetchRoom();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err) {
+      alert(getErrorMessage(err));
     }
   };
 
@@ -98,8 +85,8 @@ export const GameRoom = () => {
     try {
       await leaveRoom(roomId);
       navigate('/'); // ロビー一覧へ戻る
-    } catch (err: any) {
-      alert("退出に失敗しました: " + err.message);
+    } catch (err) {
+      alert('退出に失敗しました: ' + getErrorMessage(err));
       navigate('/'); // 失敗してもとりあえずロビーに戻す
     }
   };
@@ -113,7 +100,7 @@ export const GameRoom = () => {
   const handleStartGame = async () => {
     if (!roomId) return;
     try { await startGame(roomId); fetchRoom(); }
-    catch (err: any) { showMessage('開始エラー: ' + err.message); }
+    catch (err) { showMessage('開始エラー: ' + getErrorMessage(err)); }
   };
 
   const handleDropCards = async () => {
@@ -125,8 +112,8 @@ export const GameRoom = () => {
       await playCard(roomId, selectedCardIds);
       setSelectedCardIds([]);
       fetchRoom();
-    } catch (err: any) {
-      showMessage('出せません: ' + err.message);
+    } catch (err) {
+      showMessage('出せません: ' + getErrorMessage(err));
     }
   };
 
@@ -137,8 +124,8 @@ export const GameRoom = () => {
       fetchRoom();
       showMessage("パスしました");
     }
-    catch (err: any) {
-      showMessage('パスエラー: ' + err.message);
+    catch (err) {
+      showMessage('パスエラー: ' + getErrorMessage(err));
     }
   };
 
@@ -171,7 +158,7 @@ export const GameRoom = () => {
     return (
       <div className={styles.container}>
         <div className={styles.headerArea}>
-          <GameHeader room={room} isRevolution={!!room.game?.isRevolution} />
+          <GameHeader room={room} isRevolution={!!room.game?.isRevolution} onLeave={handleLeave} />
         </div>
 
         <div className={styles.leftColumn}>
@@ -206,7 +193,7 @@ export const GameRoom = () => {
   return (
     <div className={styles.container}>
       <div className={styles.headerArea}>
-        <GameHeader room={room} isRevolution={isEffectiveRevolution} />
+        <GameHeader room={room} isRevolution={isEffectiveRevolution} onLeave={handleLeave} />
       </div>
 
       {showResult && (

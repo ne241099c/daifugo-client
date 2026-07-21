@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { signUp } from '../api/auth';
-import { STORAGE_KEY_TOKEN } from '../../../lib/graphql';
+import { getErrorMessage } from '../../../lib/errors';
 import styles from '../auth.module.css';
 
 export const SignUp = () => {
@@ -14,11 +14,10 @@ export const SignUp = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const data = await signUp(name, email, password);
-      localStorage.setItem(STORAGE_KEY_TOKEN, data.token);
+      await signUp(name, email, password);
       navigate('/');
-    } catch (err: any) {
-      setError(err.message || '登録に失敗しました');
+    } catch (err) {
+      setError(getErrorMessage(err, '登録に失敗しました'));
     }
   };
 

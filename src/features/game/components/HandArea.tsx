@@ -1,7 +1,9 @@
 import { useMemo } from 'react';
+import type { DragEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Card as CardType } from '../../../types';
 import { Card } from '../../../components/Card/Card';
+import { getSuitPriority } from '../../../lib/cards';
 import styles from './HandArea.module.css';
 
 interface Props {
@@ -12,15 +14,6 @@ interface Props {
   onPass: () => void;
   turnPlayerName?: string;
 }
-
-const getSuitPriority = (suit: string): number => {
-  if (suit === '♠' || suit === 'Spade') return 0;
-  if (suit === '♥' || suit === 'Heart') return 1;
-  if (suit === '♦' || suit === 'Diamond') return 2;
-  if (suit === '♣' || suit === 'Club') return 3;
-  if (suit === 'Joker') return 4;
-  return 5;
-};
 
 export const HandArea = ({
   hand,
@@ -36,13 +29,11 @@ export const HandArea = ({
       if (a.rank !== b.rank) {
         return a.rank - b.rank;
       }
-      const suitA = getSuitPriority(a.suit);
-      const suitB = getSuitPriority(b.suit);
-      return suitA - suitB;
+      return getSuitPriority(a.suit) - getSuitPriority(b.suit);
     });
   }, [hand]);
 
-  const handleDragStart = (e: React.DragEvent, cardId: number) => {
+  const handleDragStart = (e: DragEvent, cardId: number) => {
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', String(cardId));
 
@@ -85,7 +76,7 @@ export const HandArea = ({
               animate={{ opacity: 1, scale: 1 }}   // 表示中の状態
               exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }} // 消えるときのアニメーション
               transition={{ type: "spring", damping: 25, stiffness: 300 }} // バネのような動き
-              style={{ display: 'inline-block' }} // ラッパーのスタイル調整
+              className={styles.cardWrapper}
             >
               <Card
                 key={c.id}

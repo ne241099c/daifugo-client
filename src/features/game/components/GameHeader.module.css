@@ -32,6 +32,11 @@
   font-size: 0.9rem;
 }
 
+.revolutionBadge {
+  color: var(--accent-red);
+  font-size: 0.8em;
+}
+
 .actions {
   display: flex;
   gap: 12px;
