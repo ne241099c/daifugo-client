@@ -27,6 +27,8 @@ export interface Game {
   players: Player[];
   finishedPlayers?: Player[];
   passCount: number;
+  lastEvent: string;
+  eventSeq: number;
   isFinished: boolean;
 }
 

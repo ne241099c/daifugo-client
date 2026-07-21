@@ -15,6 +15,8 @@ const GET_ROOM_QUERY = `
         turn
         isRevolution
         isFinished
+        lastEvent
+        eventSeq
         fieldCards {
           id
           suit

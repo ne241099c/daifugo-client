@@ -1,0 +1,61 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 4000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.band {
+  width: 130%;
+  padding: 1.6rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  border-top: 3px solid rgba(255, 255, 255, 0.85);
+  border-bottom: 3px solid rgba(255, 255, 255, 0.85);
+}
+
+.textWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: skewX(12deg); /* 帯の傾きを打ち消して文字はまっすぐ */
+}
+
+.label {
+  font-size: clamp(2.5rem, 9vw, 6rem);
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: #fff;
+  text-shadow: 0 3px 10px rgba(0, 0, 0, 0.6);
+  line-height: 1;
+}
+
+.sub {
+  margin-top: 0.4rem;
+  font-size: clamp(0.8rem, 2vw, 1.2rem);
+  font-weight: 700;
+  letter-spacing: 0.5em;
+  text-indent: 0.5em;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* 8切り: 鋭いブルー系 */
+.eightCut {
+  background: linear-gradient(100deg, #0ea5e9 0%, #1d4ed8 50%, #0f172a 100%);
+}
+
+/* 革命: 燃えるレッド系 */
+.revolution {
+  background: linear-gradient(100deg, #f59e0b 0%, #dc2626 45%, #7f1d1d 100%);
+}
+
+/* 11バック: 妖しいパープル系 */
+.elevenBack {
+  background: linear-gradient(100deg, #a855f7 0%, #7c3aed 50%, #4c1d95 100%);
+}

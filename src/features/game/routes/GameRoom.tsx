@@ -1,9 +1,11 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 import { getRoom, startGame, playCard, pass, restartGame, leaveRoom } from '../api/game';
 import type { Room } from '../../../types';
 import { getMyUserId } from '../../../lib/auth';
 import { getErrorMessage } from '../../../lib/errors';
+import { subscribeRoomEvents } from '../../../lib/sse';
 
 import { GameHeader } from '../components/GameHeader';
 import { OpponentArea } from '../components/OpponentArea';
@@ -12,6 +14,7 @@ import { DiscardPile } from '../components/DiscardPile';
 import { HandArea } from '../components/HandArea';
 import { GameResult } from '../components/GameResult';
 import { SpectatorArea } from '../components/SpectatorArea';
+import { CutIn, type CutInType } from '../components/CutIn';
 
 import styles from './GameRoom.module.css';
 
@@ -23,6 +26,10 @@ export const GameRoom = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedCardIds, setSelectedCardIds] = useState<number[]>([]);
   const [systemMessage, setSystemMessage] = useState<string | null>(null);
+
+  // カットイン演出（8切り・革命）
+  const [cutIn, setCutIn] = useState<CutInType | null>(null);
+  const lastSeenEventSeq = useRef<number | null>(null);
 
   const myUserId = getMyUserId();
 
@@ -51,13 +58,39 @@ export const GameRoom = () => {
     }
   }, [roomId]);
 
-  // 2秒ごとに部屋の状態をポーリングする（外部システムとの同期）。
+  // 部屋の状態は SSE(/events) でサーバーの変化をほぼ即時に受け取って再取得する。
+  // ポーリングはやめ、SSE が切れた時の保険として低頻度(15秒)のフォールバックのみ残す。
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 非同期フェッチの完了後に更新するため同期的なカスケードは発生しない
-    fetchRoom();
-    const interval = setInterval(fetchRoom, 2000);
-    return () => clearInterval(interval);
+    fetchRoom(); // 初回取得
+    const unsubscribe = subscribeRoomEvents(() => fetchRoom());
+    const fallback = setInterval(fetchRoom, 15000); // SSE 切断時の保険
+    return () => {
+      unsubscribe();
+      clearInterval(fallback);
+    };
   }, [fetchRoom]);
+
+  // 8切り・革命のカットイン検出。eventSeq が増えた時だけ発火させる。
+  useEffect(() => {
+    const seq = room?.game?.eventSeq;
+    const ev = room?.game?.lastEvent;
+    if (seq == null) return;
+
+    // 初回（マウント時やゲーム途中参加時）は演出させず、基準値だけ記録する
+    if (lastSeenEventSeq.current === null) {
+      lastSeenEventSeq.current = seq;
+      return;
+    }
+    if (seq <= lastSeenEventSeq.current) return;
+    lastSeenEventSeq.current = seq;
+
+    if (ev === 'eight_cut' || ev === 'revolution' || ev === 'eleven_back') {
+      setCutIn(ev);
+      const timer = setTimeout(() => setCutIn(null), 1800);
+      return () => clearTimeout(timer);
+    }
+  }, [room?.game?.eventSeq, room?.game?.lastEvent]);
 
   const handleRematch = async () => {
     if (!roomId) return;
@@ -149,6 +182,8 @@ export const GameRoom = () => {
   if (isSpectator) {
     return (
       <div className={styles.container}>
+        <AnimatePresence>{cutIn && <CutIn type={cutIn} />}</AnimatePresence>
+
         <div className={styles.headerArea}>
           <GameHeader room={room} isRevolution={!!room.game?.isRevolution} onLeave={handleLeave} />
         </div>
@@ -182,7 +217,7 @@ export const GameRoom = () => {
 
   return (
     <div className={styles.container}>
-      {systemMessage && <div className={styles.systemMessage}>{systemMessage}</div>}
+      <AnimatePresence>{cutIn && <CutIn type={cutIn} />}</AnimatePresence>
 
       <div className={styles.headerArea}>
         <GameHeader room={room} isRevolution={isEffectiveRevolution} onLeave={handleLeave} />
@@ -216,14 +251,19 @@ export const GameRoom = () => {
       ) : (
         <>
           <div className={styles.rightColumn}>
-            <HandArea
-              hand={myPlayer?.hand || []}
-              selectedCardIds={selectedCardIds}
-              onToggleSelection={toggleCardSelection}
-              isMyTurn={isMyTurn}
-              onPass={handlePass}
-              turnPlayerName={turnPlayer?.user?.name}
-            />
+            {systemMessage && (
+              <div className={styles.systemMessageArea}>{systemMessage}</div>
+            )}
+            <div className={styles.rightBody}>
+              <HandArea
+                hand={myPlayer?.hand || []}
+                selectedCardIds={selectedCardIds}
+                onToggleSelection={toggleCardSelection}
+                isMyTurn={isMyTurn}
+                onPass={handlePass}
+                turnPlayerName={turnPlayer?.user?.name}
+              />
+            </div>
           </div>
 
           <div className={styles.leftColumn}>
