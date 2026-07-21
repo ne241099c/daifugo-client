@@ -20,6 +20,11 @@ const GET_ROOM_QUERY = `
           suit
           rank
         }
+        discardPile {
+          id
+          suit
+          rank
+        }
         players {
           userID
           hand {
