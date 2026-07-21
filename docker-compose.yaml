@@ -1,8 +1,13 @@
 services:
   frontend:
-    build: ./docker
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
     volumes:
       - .:/app
+      # ホスト(macOS)の node_modules で上書きしないよう、コンテナ内の node_modules は
+      # 匿名ボリュームとして分離する（Linux musl 用バイナリを保持するため）。
+      - /app/node_modules
     ports:
       - "5173:5173"
     command: npm run dev
