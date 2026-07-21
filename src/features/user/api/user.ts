@@ -19,6 +19,26 @@ const RENAME_USER_MUTATION = `
   }
 `;
 
+const GET_USER_QUERY = `
+  query GetUser($id: ID!) {
+    user(id: $id) {
+      id
+      name
+    }
+  }
+`;
+
+/** サーバー上に指定IDのユーザーが実在するか確認する。 */
+const userExistsOnServer = async (id: string): Promise<boolean> => {
+  try {
+    const data = await request<{ user: Guest | null }>(GET_USER_QUERY, { id });
+    return !!data.user;
+  } catch {
+    // 「user not found」などのエラーは存在しない扱いにする
+    return false;
+  }
+};
+
 const randomGuestName = (): string => `ゲスト${Math.floor(1000 + Math.random() * 9000)}`;
 
 /** ゲストを新規作成し、保存して返す。 */
@@ -36,11 +56,15 @@ export const renameUser = async (name: string): Promise<Guest> => {
 };
 
 /**
- * ゲストを保証する。既に保持していればそれを返し、無ければ自動生成した名前で作成する。
+ * ゲストを保証する。既に保持していてサーバー上にも存在すればそれを返す。
+ * サーバーがインメモリ管理で再起動によりユーザーが消えている場合は作り直す。
  * ログイン画面の代わりにアプリ起動時に一度だけ呼ぶ。
  */
 export const ensureGuest = async (): Promise<Guest> => {
   const existing = getGuest();
-  if (existing) return existing;
-  return createGuest(randomGuestName());
+  if (existing && (await userExistsOnServer(existing.id))) {
+    return existing;
+  }
+  // 未登録、またはサーバー側に存在しない（再起動でロスト）場合は作り直す
+  return createGuest(existing?.name ?? randomGuestName());
 };

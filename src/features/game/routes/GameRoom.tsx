@@ -183,6 +183,8 @@ export const GameRoom = () => {
 
   return (
     <div className={styles.container}>
+      {systemMessage && <div className={styles.systemMessage}>{systemMessage}</div>}
+
       <div className={styles.headerArea}>
         <GameHeader room={room} isRevolution={isEffectiveRevolution} onLeave={handleLeave} />
       </div>
@@ -215,7 +217,6 @@ export const GameRoom = () => {
       ) : (
         <>
           <div className={styles.rightColumn}>
-            {systemMessage && <div className={styles.systemMessageArea}>{systemMessage}</div>}
             <HandArea
               hand={myPlayer?.hand || []}
               selectedCardIds={selectedCardIds}
